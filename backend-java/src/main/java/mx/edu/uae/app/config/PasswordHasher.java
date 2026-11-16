@@ -3,6 +3,8 @@ package mx.edu.uae.app.config;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.io.Console;
+import java.util.Arrays;
 import java.util.Base64;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -12,6 +14,23 @@ public final class PasswordHasher {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private PasswordHasher() {
+    }
+
+    public static void main(String[] args) throws GeneralSecurityException {
+        Console console = System.console();
+        if (console == null) {
+            System.err.println("Se requiere una terminal interactiva.");
+            return;
+        }
+        char[] password = console.readPassword("Contraseña: ");
+        if (password == null) {
+            return;
+        }
+        try {
+            System.out.println(hash(password));
+        } finally {
+            Arrays.fill(password, '\0');
+        }
     }
 
     public static String hash(char[] password) throws GeneralSecurityException {
