@@ -1,0 +1,21 @@
+# Java y Maven
+*.class
+*.jar
+target/
+build/
+out/
+
+# NetBeans y VS Code
+nbproject/private/
+.vscode/
+
+# Credenciales locales
+.env
+.env.*
+!.env.example
+
+# Linux y editores
+*~
+*.swp
+*.swo
+.directory
