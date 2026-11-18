@@ -1,38 +1,62 @@
 # App Unificada UAE
 
-Proyecto universitario de 5.º semestre de Ingeniería en Tecnologías de la Información de la Universidad Albert Einstein. Su propósito es reunir en una aplicación de escritorio la información y los servicios cotidianos de estudiantes, docentes y personal: cafetería, horarios, transporte, avisos de salud, anuncios y votaciones del CCE y encuestas.
+Proyecto colaborativo de 5.º semestre de Ingeniería en Tecnologías de la Información de la Universidad Albert Einstein. El objetivo es construir una plataforma móvil institucional para estudiantes, docentes, trabajadores, directivos y áreas administrativas: un solo lugar para la vida académica, transporte, compras, pagos, avisos y participación universitaria.
 
-Esta primera etapa proporciona el esquema de datos y una base Java Swing/JDBC. El inicio de sesión y los DAO de consulta de cafetería y votaciones son ejemplos funcionales; el panel y los demás módulos aún están en desarrollo. No es un sistema listo para producción ni sustituye los canales oficiales de emergencia.
+La aplicación móvil se construirá con **Flutter** y consumirá una **API REST Java**. La aplicación Java Swing existente se conserva como legado de referencia mientras se migra la lógica al backend; no se debe agregar funcionalidad nueva allí.
 
-## Estructura
+## Alcance del producto
+
+- **Identidad y acceso:** correo institucional, perfiles y permisos por rol.
+- **Inicio personalizado:** materias, asistencia, pendientes, avisos y accesos rápidos.
+- **Académico:** horarios por carrera/grupo, materias, tareas, progreso y calificación estimada.
+- **Transporte:** cuatro rutas configurables, paradas, horarios, ubicación en tiempo real y confirmación de salidas extraordinarias.
+- **Compras:** prototipo de pedidos para Cafetería Arriba y Cafetería Abajo, descuentos estudiantiles y futura integración de venta.
+- **Pagos y documentos:** mensualidades, servicios, comprobantes y seguimiento de constancias.
+- **Comunidad:** avisos oficiales, marketing, CCE, encuestas y votaciones.
+
+La información de rutas, montos, horarios y políticas debe validarse con la universidad antes de considerarse oficial.
+
+## Estructura del monorepo
 
 ```text
-database/         Esquema MySQL/MariaDB y plantilla de datos
-backend-java/     Aplicación Java 17: configuración, modelos, DAO y vistas Swing
-hardware-bomba/   Documentación y firmware pendiente del juego físico
+apps/mobile/                         Aplicación Flutter para Android/iOS
+services/api-java/                   API REST Java (destino de la migración)
+services/desktop-legacy/backend-java/Cliente Java Swing/JDBC legado
+database/                            Esquema, migraciones y datos de desarrollo
+docs/                                Arquitectura, módulos, roles y operación del equipo
+hardware-bomba/                      Prototipo físico independiente
 ```
 
-El esquema separa las paradas de las rutas y las opciones de las votaciones; las claves foráneas relacionan los módulos y evitan asignar a una votación una opción de otra. Los precios de los detalles de pedido son históricos. Los votos quedan asociados a los usuarios: este diseño no garantiza anonimato.
+Consulta primero:
+
+1. `docs/00-justificacion-del-proyecto.md`
+2. `docs/01-arquitectura-repositorio.md`
+3. `docs/02-modulos-y-mvp.md`
+4. `docs/03-guia-del-equipo.md`
+5. `docs/kanban.md`
+
+La documentación complementaria del equipo está en la carpeta compartida de [Google Drive](https://drive.google.com/drive/folders/1JWi4O-No4db1N4jgEwp1JrdOCgdOGl7k?usp=sharing).
+
+## Reglas importantes
+
+- No subir contraseñas, tokens, datos reales de alumnos ni archivos `.env`.
+- Toda funcionalidad debe tener responsable, criterios de aceptación y prueba.
+- Los cambios de base de datos se agregan como migración nueva; no se edita una migración ya compartida.
+- El backend es la autoridad para permisos, pagos, votos y estados; Flutter nunca debe confiar solo en validaciones visuales.
+- Los datos de transporte en tiempo real son informativos y no sustituyen los canales oficiales.
 
 ## Base de datos
 
 Se requiere MySQL 8.0.16 o posterior o MariaDB 10.5 o posterior, con soporte de restricciones `CHECK`. El script crea la base `app_unificada_uae`; ejecútelo una sola vez sobre una instalación vacía. Para volver a ejecutarlo en desarrollo, elimine previamente la base **solo si está seguro de perder todos sus datos**.
 
-En DBeaver, cree una conexión al servidor con una cuenta autorizada para crear bases y tablas, abra `database/01_ddl_app_unificada_uae.sql` en el editor SQL y ejecute el script completo (no solo la sentencia seleccionada). Después abra `database/02_dml_datos_prueba.sql` y adapte sus ejemplos comentados. También puede usar el cliente:
+En DBeaver, abra `database/01_ddl_app_unificada_uae.sql` y ejecútelo completo. Después revise `database/02_dml_datos_prueba.sql` y adapte únicamente los ejemplos necesarios. No use una cuenta administradora desde la aplicación.
+
+## Cliente legado Java
+
+Requisitos: JDK 17, Maven, MySQL accesible y entorno gráfico. Este cliente solo conserva el prototipo actual durante la migración:
 
 ```sh
-mysql -u administrador -p < database/01_ddl_app_unificada_uae.sql
-mysql -u administrador -p < database/02_dml_datos_prueba.sql
-```
-
-Los ejemplos son una plantilla y no crean usuarios automáticamente. Cree por separado una cuenta de base de datos para la aplicación con los permisos mínimos necesarios sobre esta base, sin usar la cuenta administradora para ejecutar el cliente.
-
-## Aplicación Java
-
-Requisitos: JDK 17, Maven, MySQL accesible y entorno gráfico. El conector Maven incluido es MySQL Connector/J; la conexión de ejemplo está dirigida a MySQL. Desde la raíz:
-
-```sh
-cd backend-java
+cd services/desktop-legacy/backend-java
 mvn package dependency:copy-dependencies
 export DB_URL='jdbc:mysql://localhost:3306/app_unificada_uae'
 export DB_USER='su_usuario'
@@ -41,19 +65,8 @@ export DB_PASSWORD
 java -cp 'target/classes:target/dependency/*' mx.edu.uae.app.view.LoginFrame
 ```
 
-En Windows sustituya `:` por `;` en el classpath y configure las variables según su terminal. `backend-java/.env.example` documenta los nombres de las variables; Java las lee del entorno y **no carga archivos `.env` automáticamente**. No publique credenciales; para conexiones remotas configure TLS y la verificación del servidor según la documentación del conector.
-
-Para crear un usuario de prueba, genere un hash usando `PasswordHasher.hash(char[])`, que produce `pbkdf2_sha256$iteraciones$sal_base64$hash_base64` con sal aleatoria. Después de compilar, en una terminal interactiva ejecute:
-
-```sh
-java -cp target/classes mx.edu.uae.app.config.PasswordHasher
-```
-
-Escriba la contraseña cuando se solicite y copie únicamente el hash generado al campo `password_hash` del ejemplo SQL. Use un correo `@uae.edu.mx` y nunca guarde contraseñas en texto plano. El alta de usuarios y la gestión de permisos todavía deben implementarse antes de un despliegue real.
+Java lee las variables del entorno y **no carga archivos `.env` automáticamente**. Nunca publique credenciales ni contraseñas en texto plano.
 
 ## Contribución
 
-1. Cristian, Enrique, Donovan, Camila y Carlos: acuerden la tarea y trabajen en una rama por cambio.
-2. Mantengan separados el esquema, la aplicación y el prototipo físico; documenten los cambios de configuración y las migraciones de datos.
-3. Compilen con `mvn package` desde `backend-java` y prueben los scripts SQL en una base de desarrollo antes de solicitar revisión.
-4. Abran una solicitud de cambios con una descripción y los pasos de prueba; soliciten revisión de otro integrante. No incluyan credenciales, datos reales, archivos generados ni dependencias descargadas.
+La asignación de trabajo, el flujo de ramas, las revisiones y el procedimiento para cada integrante están en `docs/03-guia-del-equipo.md`. El trabajo pendiente priorizado está en `docs/kanban.md`.
