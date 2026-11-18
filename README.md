@@ -34,7 +34,7 @@ Consulta primero:
 2. `docs/01-arquitectura-repositorio.md`
 3. `docs/02-modulos-y-mvp.md`
 4. `docs/03-guia-del-equipo.md`
-5. `docs/kanban.md`
+5. [KanBan] (https://trello.com/invite/b/6abfddaef626f8ca41f4136f/ATTI8765e7c5599da8e4c2f78df7b85e6d88D89035AB/mi-tablero-de-trello)
 
 La documentación complementaria del equipo está en la carpeta compartida de [Google Drive](https://drive.google.com/drive/folders/1JWi4O-No4db1N4jgEwp1JrdOCgdOGl7k?usp=sharing).
 
