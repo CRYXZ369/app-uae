@@ -62,7 +62,7 @@ Las rutas, paradas y horarios pueden cambiar. Además, todavía falta confirmar 
 
 Si escribimos las rutas directamente dentro de la aplicación, cada cambio obligaría a publicar una nueva versión. Si las guardamos en la base de datos, una persona autorizada puede actualizarlas sin reconstruir todo el teléfono. La ruta desconocida se marca como `POR_CONFIRMAR`; nunca se inventa información.
 
-## ¿Por qué la salida de medianoche necesita confirmación?
+## ¿Por qué la salida de mediadia necesita confirmación?
 
 Un autobús puede no salir si casi nadie lo utiliza. La confirmación permite saber cuántas personas realmente lo necesitan antes de decidir.
 
