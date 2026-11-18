@@ -3,6 +3,7 @@
 Proyecto colaborativo de 5.º semestre de Ingeniería en Tecnologías de la Información de la Universidad Albert Einstein. El objetivo es construir una plataforma móvil institucional para estudiantes, docentes, trabajadores, directivos y áreas administrativas: un solo lugar para la vida académica, transporte, compras, pagos, avisos y participación universitaria.
 
 La aplicación móvil se construirá con **Flutter** y consumirá una **API REST Java**. La aplicación Java Swing existente se conserva como legado de referencia mientras se migra la lógica al backend; no se debe agregar funcionalidad nueva allí.
+<img width="1160" height="712" alt="image" src="https://github.com/user-attachments/assets/cb15fe27-3762-4d6c-aa9f-eb5941be2265" />
 
 ## Alcance del producto
 
