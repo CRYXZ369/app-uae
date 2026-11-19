@@ -1,20 +1,46 @@
 # Aplicación móvil Flutter
 
-Esta carpeta contendrá la aplicación móvil Android/iOS de App Unificada UAE.
+Esta carpeta contiene la aplicación Flutter para Android/iOS de App Unificada UAE.
+Por ahora muestra una pantalla inicial; no tiene inicio de sesión ni conexión a la API.
 
 ## Primer arranque
 
-Cuando se inicialice el proyecto:
+Instala el [SDK de Flutter](https://docs.flutter.dev/install) y la extensión
+Flutter de VS Code, que también instala la extensión de Dart. Después, desde
+la raíz del repositorio:
 
 ```sh
-flutter create --org mx.edu.uae apps/mobile
 cd apps/mobile
+flutter doctor
 flutter pub get
 flutter analyze
 flutter test
 ```
 
-La estructura recomendada será:
+El proyecto se creó con Flutter stable 3.50.0. Cada integrante necesita su
+propio SDK; este no se comparte en Git. La primera descarga de dependencias
+requiere conexión a internet.
+
+Para una vista previa rápida sin Android, ejecuta `flutter run -d web-server`
+y abre la dirección indicada en un navegador. La depuración con este modo es
+limitada; Chrome o Edge permiten depuración web desde VS Code. Para Android
+necesitas configurar el Android SDK y conectar un teléfono o iniciar un
+emulador. Para compilar y probar iOS se requiere macOS con Xcode.
+
+En VS Code, abre este repositorio, abre `apps/mobile/lib/main.dart`, selecciona
+un dispositivo en la barra inferior y presiona F5. Si Flutter no aparece,
+reinicia VS Code después de instalarlo y revisa `flutter doctor`.
+
+## Trabajo en equipo
+
+Cada integrante clona el repositorio, instala Flutter y ejecuta `flutter pub get`.
+Trabajen en ramas separadas y compartan cambios mediante pull requests; consulten
+la [guía del equipo](../../docs/03-guia-del-equipo.md). VS Code Live Share es
+opcional para editar juntos en tiempo real, pero no sustituye Git ni GitHub.
+
+## Organización
+
+La estructura prevista es:
 
 ```text
 lib/
@@ -33,4 +59,7 @@ lib/
     transport/
 ```
 
-No se deben crear pantallas directamente en `lib/` ni llamar a SQL desde Flutter. Cada feature debe separar modelos, repositorios, estado y widgets.
+Actualmente `lib/main.dart` arranca la aplicación y `lib/app/app.dart` contiene
+la pantalla inicial. Las demás carpetas se crearán conforme se implementen las
+funciones. No se debe llamar a SQL desde Flutter. Cada feature debe separar
+modelos, repositorios, estado y widgets.
