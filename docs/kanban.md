@@ -22,6 +22,7 @@ Estados: `Backlog` -> `Por hacer` -> `En progreso` -> `En revisión` -> `Hecho`.
 | F1-04 | Definir contrato OpenAPI inicial | CRYXZ + Kike | Por hacer |
 | F1-05 | Crear tema visual basado en Figma | Camila | Por hacer |
 | F1-06 | Configurar CI para compilación y pruebas | CRYXZ | Por hacer |
+| F1-07 | Migrar esquema y conexión a PostgreSQL/Supabase | CRYXZ | En proceso |
 
 ## Fase 2 - MVP académico y comunicación
 
@@ -41,7 +42,7 @@ Estados: `Backlog` -> `Por hacer` -> `En progreso` -> `En revisión` -> `Hecho`.
 |---|---|---|---|
 | F3-01 | CRUD de rutas y paradas | Kike + CRYXZ | Por hacer |
 | F3-02 | Horarios estimados por parada | Kike | Por hacer |
-| F3-03 | Confirmación de salida de las 12:00 a. m. | Kike + Camila | Por hacer |
+| F3-03 | Confirmación de salida de las 12:00 p. m. (mediodía) | Kike + Camila | Por hacer |
 | F3-04 | Modelo de ubicación y última actualización | Kike + CRYXZ | Por hacer |
 | F3-05 | Mapa/estado de unidad en Flutter | Donovan | Por hacer |
 | F3-06 | Pruebas con ruta faltante POR_CONFIRMAR | Carlos | Por hacer |

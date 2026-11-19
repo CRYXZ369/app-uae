@@ -2,7 +2,7 @@
 
 Proyecto colaborativo de 5.º semestre de Ingeniería en Tecnologías de la Información de la Universidad Albert Einstein. El objetivo es construir una plataforma móvil institucional para estudiantes, docentes, trabajadores, directivos y áreas administrativas: un solo lugar para la vida académica, transporte, compras, pagos, avisos y participación universitaria.
 
-La aplicación móvil se construirá con **Flutter** y consumirá una **API REST Java**. La aplicación Java Swing existente se conserva como legado de referencia mientras se migra la lógica al backend; no se debe agregar funcionalidad nueva allí.
+La aplicación móvil se construirá con **Flutter** y consumirá una **API REST Java**. La persistencia objetivo es **PostgreSQL administrado por Supabase**. La aplicación Java Swing existente se conserva como legado de referencia mientras se migra la lógica al backend; no se debe agregar funcionalidad nueva allí.
 <img width="1160" height="712" alt="image" src="https://github.com/user-attachments/assets/cb15fe27-3762-4d6c-aa9f-eb5941be2265" />
 
 ## Alcance del producto
@@ -34,7 +34,10 @@ Consulta primero:
 2. `docs/01-arquitectura-repositorio.md`
 3. `docs/02-modulos-y-mvp.md`
 4. `docs/03-guia-del-equipo.md`
-5. [KanBan](https://trello.com/invite/b/6abfddaef626f8ca41f4136f/ATTI8765e7c5599da8e4c2f78df7b85e6d88D89035AB/mi-tablero-de-trello)
+5. `docs/kanban.md`
+6. `docs/roles-y-permisos.md`
+7. `docs/sincronizacion-equipo.md`
+8. [Kanban en Trello](https://trello.com/invite/b/6abfddaef626f8ca41f4136f/ATTI8765e7c5599da8e4c2f78df7b85e6d88D89035AB/mi-tablero-de-trello)
 
 La documentación complementaria del equipo está en la carpeta compartida de [Google Drive](https://drive.google.com/drive/folders/1JWi4O-No4db1N4jgEwp1JrdOCgdOGl7k?usp=sharing).
 
@@ -46,20 +49,20 @@ La documentación complementaria del equipo está en la carpeta compartida de [G
 - El backend es la autoridad para permisos, pagos, votos y estados; Flutter nunca debe confiar solo en validaciones visuales.
 - Los datos de transporte en tiempo real son informativos y no sustituyen los canales oficiales.
 
-## Base de datos
+## Base de datos PostgreSQL / Supabase
 
-Se requiere MySQL 8.0.16 o posterior o MariaDB 10.5 o posterior, con soporte de restricciones `CHECK`. El script crea la base `app_unificada_uae`; ejecútelo una sola vez sobre una instalación vacía. Para volver a ejecutarlo en desarrollo, elimine previamente la base **solo si está seguro de perder todos sus datos**.
+Supabase utiliza PostgreSQL. El esquema de referencia está en `database/01_ddl_app_unificada_uae_postgres.sql`. Ejecútelo en el SQL Editor de un proyecto de desarrollo de Supabase o con `psql`. No sustituya el proyecto de Supabase de otra persona ni ejecute migraciones destructivas sin respaldo.
 
-En DBeaver, abra `database/01_ddl_app_unificada_uae.sql` y ejecútelo completo. Después revise `database/02_dml_datos_prueba.sql` y adapte únicamente los ejemplos necesarios. No use una cuenta administradora desde la aplicación.
+`database/01_ddl_app_unificada_uae.sql` es el esquema histórico de MySQL y se conserva únicamente como referencia del prototipo anterior. Los datos de desarrollo deben adaptarse a PostgreSQL antes de ejecutarse. No use credenciales de administrador ni publique claves de Supabase.
 
 ## Cliente legado Java
 
-Requisitos: JDK 17, Maven, MySQL accesible y entorno gráfico. Este cliente solo conserva el prototipo actual durante la migración:
+Requisitos: JDK 17, Maven, PostgreSQL/Supabase accesible y entorno gráfico. Este cliente solo conserva el prototipo actual durante la migración:
 
 ```sh
 cd services/desktop-legacy/backend-java
 mvn package dependency:copy-dependencies
-export DB_URL='jdbc:mysql://localhost:3306/app_unificada_uae'
+export DB_URL='jdbc:postgresql://HOST:5432/postgres?sslmode=require'
 export DB_USER='su_usuario'
 read -rs -p 'Contraseña de base de datos: ' DB_PASSWORD; echo
 export DB_PASSWORD

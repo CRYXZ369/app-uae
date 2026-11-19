@@ -14,7 +14,7 @@ La distribución es inicial, no una barrera: cualquier integrante puede pedir re
 
 ## Preparación de cada integrante
 
-Todos deben instalar Git, JDK 17, Maven, Flutter stable, Android Studio o dispositivo de prueba, MySQL/MariaDB y un cliente REST. Cada persona debe poder clonar, crear rama, ejecutar el proyecto y abrir un Pull Request.
+Todos deben instalar Git, JDK 17, Maven, Flutter stable, Android Studio o dispositivo de prueba, acceso al proyecto de PostgreSQL/Supabase y un cliente REST. Cada persona debe poder clonar, crear rama, ejecutar el proyecto y abrir un Pull Request.
 
 ## Flujo de ramas
 

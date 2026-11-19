@@ -5,7 +5,7 @@
 Se usará un monorepo con tres capas:
 
 ```text
-Flutter móvil -> API REST Java -> MySQL/MariaDB
+Flutter móvil -> API REST Java -> PostgreSQL/Supabase
                          ├── notificaciones
                          ├── ubicación de transporte
                          └── archivos/comprobantes
@@ -58,7 +58,7 @@ Cada módulo debe definir objetivo, actores, endpoints, tablas, estados, permiso
 
 - Java: paquetes `mx.edu.uae.api.<modulo>`, clases en `PascalCase`, métodos en `camelCase`.
 - Flutter: carpetas por módulo y archivos en `snake_case.dart`.
-- SQL: migraciones numeradas (`03_...sql`) y nombres en `snake_case`.
+- SQL: migraciones numeradas (`03_...sql`) y nombres en `snake_case`; la sintaxis objetivo es PostgreSQL.
 - API: rutas plurales (`/api/v1/announcements`), JSON camelCase y errores consistentes.
 - Fechas: ISO 8601 con zona horaria; dinero en centavos o `BigDecimal`, nunca `double`.
 - Roles y permisos se validan en backend; ocultar un botón no es autorización.

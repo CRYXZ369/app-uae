@@ -29,7 +29,7 @@ Las rutas no deben quedar codificadas en Flutter. Inicialmente se cargarán como
 
 Cada ruta tendrá salida, paradas ordenadas, hora estimada por parada, unidad, estado y última ubicación. La ruta faltante se registra como `POR_CONFIRMAR`, nunca se inventa.
 
-La salida de las 12:00 a. m. UAE -> El Charco funcionará como votación/confirmación de lunes a viernes: ventana de confirmación, mínimo de pasajeros configurable, cierre automático, resultado visible y registro auditable.
+La salida de las **12:00 p. m. (mediodía)** UAE -> El Charco funcionará como votación/confirmación de lunes a viernes: ventana de confirmación, mínimo de pasajeros configurable, cierre automático, resultado visible y registro auditable.
 
 ### 5. Compras y cafeterías
 
