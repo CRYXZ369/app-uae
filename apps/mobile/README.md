@@ -40,7 +40,8 @@ opcional para editar juntos en tiempo real, pero no sustituye Git ni GitHub.
 
 ## Organización
 
-La estructura prevista es:
+La estructura inicial implementada se resume al final en «Estado actual»;
+la lista siguiente muestra módulos previstos para fases posteriores:
 
 ```text
 lib/
@@ -59,7 +60,17 @@ lib/
     transport/
 ```
 
-Actualmente `lib/main.dart` arranca la aplicación y `lib/app/app.dart` contiene
-la pantalla inicial. Las demás carpetas se crearán conforme se implementen las
-funciones. No se debe llamar a SQL desde Flutter. Cada feature debe separar
+Actualmente `lib/main.dart` arranca la aplicación y
+`lib/features/home/presentation/home_screen.dart` contiene la pantalla inicial.
+Las demás carpetas se crearán conforme se implementen las funciones. No se
+debe llamar a SQL desde Flutter. Cada feature debe separar
 modelos, repositorios, estado y widgets.
+
+## Estado actual
+
+La estructura inicial implementada es `app/` (configuración y rutas),
+`core/widgets/` (estados reutilizables de carga y error) y
+`features/home/` (pantalla inicial). `AppUae` registra la ruta de inicio y
+muestra un estado de error con una acción para rutas no registradas. Las demás
+features se crearán conforme se definan sus funciones; no es necesario crear
+módulos vacíos por adelantado.

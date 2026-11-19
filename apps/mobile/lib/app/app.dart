@@ -1,5 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../core/widgets/app_error_screen.dart';
+import '../features/home/presentation/home_screen.dart';
+import 'app_routes.dart';
+
 class AppUae extends StatelessWidget {
   const AppUae({super.key});
 
@@ -8,28 +12,17 @@ class AppUae extends StatelessWidget {
     return MaterialApp(
       title: 'App Unificada UAE',
       theme: ThemeData(colorSchemeSeed: Colors.blue, useMaterial3: true),
-      home: const Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'App Unificada UAE',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'La aplicación está en desarrollo.',
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ),
+      initialRoute: AppRoutes.home,
+      routes: {
+        AppRoutes.home: (_) => const HomeScreen(),
+      },
+      onUnknownRoute: (_) => MaterialPageRoute<void>(
+        builder: (_) => AppErrorScreen(
+          title: 'Pantalla no encontrada',
+          message: 'No se encontró la pantalla solicitada.',
+          actionLabel: 'Volver al inicio',
+          onAction: (context) => Navigator.of(context)
+              .pushNamedAndRemoveUntil(AppRoutes.home, (_) => false),
         ),
       ),
     );
