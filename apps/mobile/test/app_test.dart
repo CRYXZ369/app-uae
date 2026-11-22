@@ -1,17 +1,295 @@
 import 'dart:async';
 
 import 'package:app_unificada_uae/app/app.dart';
+import 'package:app_unificada_uae/core/session/session_store.dart';
 import 'package:app_unificada_uae/core/widgets/app_error_screen.dart';
 import 'package:app_unificada_uae/core/widgets/app_loading_screen.dart';
+import 'package:app_unificada_uae/features/auth/domain/auth_session.dart';
+import 'package:app_unificada_uae/features/auth/presentation/login_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+final _testSession = AuthSession(
+  accessToken: 'access-token',
+  refreshToken: 'refresh-token',
+  email: 'alumno@uae.edu.mx',
+  expiresAt: DateTime.utc(2099),
+);
+
 void main() {
-  testWidgets('muestra la pantalla inicial', (tester) async {
-    await tester.pumpWidget(const AppUae());
+  test('la sesión persiste tokens y no incluye contraseñas', () {
+    final serialized = _testSession.toJson();
+    final restored = AuthSession.fromJson(serialized);
+
+    expect(serialized['accessToken'], _testSession.accessToken);
+    expect(serialized['refreshToken'], _testSession.refreshToken);
+    expect(serialized.containsKey('password'), isFalse);
+    expect(restored.email, _testSession.email);
+  });
+
+  testWidgets('muestra el formulario de inicio de sesión', (tester) async {
+    await tester.pumpWidget(AppUae(sessionStore: FakeSessionStore()));
+    await tester.pumpAndSettle();
 
     expect(find.text('App Unificada UAE'), findsOneWidget);
+    expect(find.text('Correo institucional'), findsOneWidget);
+    expect(find.text('Contraseña'), findsOneWidget);
+    expect(find.text('Iniciar sesión'), findsOneWidget);
+  });
+
+  testWidgets('valida formato de correo y campos requeridos', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LoginScreen(
+          onLogin: (_, _) async => LoginResult.authenticated(_testSession),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Iniciar sesión'));
+    await tester.pump();
+
+    expect(find.text('Ingresa tu correo institucional.'), findsOneWidget);
+    expect(find.text('Ingresa tu contraseña.'), findsOneWidget);
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Correo institucional'),
+      'correo-invalido',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Contraseña'),
+      'secreto',
+    );
+    await tester.tap(find.text('Iniciar sesión'));
+    await tester.pump();
+
+    expect(find.text('Ingresa un correo con formato válido.'), findsOneWidget);
+  });
+
+  testWidgets('permite mostrar y ocultar la contraseña', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LoginScreen(
+          onLogin: (_, _) async => LoginResult.authenticated(_testSession),
+        ),
+      ),
+    );
+
+    final passwordField = tester.widget<TextField>(
+      find.descendant(
+        of: find.widgetWithText(TextFormField, 'Contraseña'),
+        matching: find.byType(TextField),
+      ),
+    );
+    expect(passwordField.obscureText, isTrue);
+
+    await tester.tap(find.byTooltip('Mostrar contraseña'));
+    await tester.pump();
+
+    final visiblePasswordField = tester.widget<TextField>(
+      find.descendant(
+        of: find.widgetWithText(TextFormField, 'Contraseña'),
+        matching: find.byType(TextField),
+      ),
+    );
+    expect(visiblePasswordField.obscureText, isFalse);
+    expect(find.byTooltip('Ocultar contraseña'), findsOneWidget);
+  });
+
+  testWidgets('muestra carga durante la autenticación', (tester) async {
+    final completer = Completer<LoginResult>();
+    await tester.pumpWidget(
+      MaterialApp(home: LoginScreen(onLogin: (_, _) => completer.future)),
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Correo institucional'),
+      'alumno@uae.edu.mx',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Contraseña'),
+      'secreto',
+    );
+
+    await tester.tap(find.text('Iniciar sesión'));
+    await tester.pump();
+
+    expect(find.text('Iniciando sesión...'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(
+      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      isNull,
+    );
+
+    completer.complete(const LoginResult.unavailable());
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('muestra error cuando el servicio rechaza las credenciales', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LoginScreen(
+          onLogin: (_, _) async => const LoginResult.invalidCredentials(),
+        ),
+      ),
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Correo institucional'),
+      'alumno@uae.edu.mx',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Contraseña'),
+      'incorrecta',
+    );
+
+    await tester.tap(find.text('Iniciar sesión'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('El correo o la contraseña son incorrectos.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('guarda sesión y abre el inicio tras autenticar', (tester) async {
+    final sessionStore = FakeSessionStore();
+    await tester.pumpWidget(
+      AppUae(
+        sessionStore: sessionStore,
+        onLogin: (_, _) async => LoginResult.authenticated(_testSession),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Correo institucional'),
+      'alumno@uae.edu.mx',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Contraseña'),
+      'secreto',
+    );
+
+    await tester.tap(find.text('Iniciar sesión'));
+    await tester.pumpAndSettle();
+
+    expect(sessionStore.session?.accessToken, _testSession.accessToken);
     expect(find.text('La aplicación está en desarrollo.'), findsOneWidget);
+    await tester.tap(find.text('Cerrar sesión'));
+    await tester.pumpAndSettle();
+
+    expect(sessionStore.session, isNull);
+    expect(find.text('Iniciar sesión'), findsOneWidget);
+  });
+
+  testWidgets('restaura la sesión guardada al iniciar', (tester) async {
+    await tester.pumpWidget(
+      AppUae(sessionStore: FakeSessionStore(_testSession)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('La aplicación está en desarrollo.'), findsOneWidget);
+    expect(find.text('Cerrar sesión'), findsOneWidget);
+  });
+
+  testWidgets('elimina y no restaura una sesión expirada', (tester) async {
+    final store = FakeSessionStore(
+      AuthSession(
+        accessToken: 'expired-token',
+        email: 'alumno@uae.edu.mx',
+        expiresAt: DateTime.now().subtract(const Duration(minutes: 1)),
+      ),
+    );
+    await tester.pumpWidget(AppUae(sessionStore: store));
+    await tester.pumpAndSettle();
+
+    expect(store.session, isNull);
+    expect(store.didClear, isTrue);
+    expect(find.text('Iniciar sesión'), findsOneWidget);
+  });
+
+  testWidgets('muestra error si falla la lectura del almacenamiento seguro', (
+    tester,
+  ) async {
+    final store = FakeSessionStore()..failReads = true;
+    await tester.pumpWidget(AppUae(sessionStore: store));
+    await tester.pumpAndSettle();
+
+    expect(find.text('No se pudo recuperar la sesión'), findsOneWidget);
+    expect(find.text('Reintentar'), findsOneWidget);
+  });
+
+  testWidgets('muestra error y no entra si no puede guardar la sesión', (
+    tester,
+  ) async {
+    final store = FakeSessionStore()..failWrites = true;
+    await tester.pumpWidget(
+      AppUae(
+        sessionStore: store,
+        onLogin: (_, _) async => LoginResult.authenticated(_testSession),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Correo institucional'),
+      'alumno@uae.edu.mx',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Contraseña'),
+      'secreto',
+    );
+
+    await tester.tap(find.text('Iniciar sesión'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('No se pudo guardar la sesión de forma segura.'),
+      findsOneWidget,
+    );
+    expect(find.text('Cerrar sesión'), findsNothing);
+  });
+
+  testWidgets('mantiene la sesión visible si falla el borrado seguro', (
+    tester,
+  ) async {
+    final store = FakeSessionStore(_testSession)..failClears = true;
+    await tester.pumpWidget(AppUae(sessionStore: store));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Cerrar sesión'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cerrar sesión'), findsOneWidget);
+    expect(
+      find.text(
+        'No se pudo cerrar la sesión de forma segura. Inténtalo de nuevo.',
+      ),
+      findsOneWidget,
+    );
+    expect(store.session?.accessToken, _testSession.accessToken);
+  });
+
+  testWidgets('indica que falta conectar el servicio de autenticación', (
+    tester,
+  ) async {
+    await tester.pumpWidget(AppUae(sessionStore: FakeSessionStore()));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Correo institucional'),
+      'alumno@uae.edu.mx',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Contraseña'),
+      'secreto',
+    );
+
+    await tester.tap(find.text('Iniciar sesión'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('El inicio de sesión aún no está conectado al servicio.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('muestra una pantalla de carga con su mensaje', (tester) async {
@@ -23,31 +301,33 @@ void main() {
     expect(find.text('Cargando datos'), findsOneWidget);
   });
 
-  testWidgets('muestra el error para rutas no registradas', (tester) async {
-    await tester.pumpWidget(const AppUae());
+  testWidgets('muestra error para rutas no registradas', (tester) async {
+    await tester.pumpWidget(AppUae(sessionStore: FakeSessionStore()));
+    await tester.pumpAndSettle();
     unawaited(
-      tester.state<NavigatorState>(find.byType(Navigator)).pushNamed<void>(
-        '/ruta-inexistente',
-      ),
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .pushNamed<void>('/ruta-inexistente'),
     );
     await tester.pumpAndSettle();
 
     expect(find.text('Pantalla no encontrada'), findsOneWidget);
-    expect(find.text('Volver al inicio'), findsOneWidget);
+    expect(find.text('Continuar'), findsOneWidget);
   });
 
-  testWidgets('la acción de error regresa al inicio', (tester) async {
-    await tester.pumpWidget(const AppUae());
+  testWidgets('la acción de error vuelve al formulario', (tester) async {
+    await tester.pumpWidget(AppUae(sessionStore: FakeSessionStore()));
+    await tester.pumpAndSettle();
     unawaited(
-      tester.state<NavigatorState>(find.byType(Navigator)).pushNamed<void>(
-        '/ruta-inexistente',
-      ),
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .pushNamed<void>('/ruta-inexistente'),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Volver al inicio'));
+    await tester.tap(find.text('Continuar'));
     await tester.pumpAndSettle();
 
-    expect(find.text('App Unificada UAE'), findsOneWidget);
+    expect(find.text('Iniciar sesión'), findsOneWidget);
   });
 
   testWidgets('la pantalla de error muestra el mensaje recibido', (
@@ -60,9 +340,41 @@ void main() {
     );
 
     expect(find.text('Ocurrió un error'), findsOneWidget);
-    expect(
-      find.text('No fue posible completar la solicitud.'),
-      findsOneWidget,
-    );
+    expect(find.text('No fue posible completar la solicitud.'), findsOneWidget);
   });
+}
+
+class FakeSessionStore implements SessionStore {
+  FakeSessionStore([this.session]);
+
+  AuthSession? session;
+  bool didClear = false;
+  bool failReads = false;
+  bool failWrites = false;
+  bool failClears = false;
+
+  @override
+  Future<AuthSession?> read() async {
+    if (failReads) {
+      throw const SessionStorageException();
+    }
+    return session;
+  }
+
+  @override
+  Future<void> write(AuthSession session) async {
+    if (failWrites) {
+      throw const SessionStorageException();
+    }
+    this.session = session;
+  }
+
+  @override
+  Future<void> clear() async {
+    if (failClears) {
+      throw const SessionStorageException();
+    }
+    didClear = true;
+    session = null;
+  }
 }
