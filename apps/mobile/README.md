@@ -69,8 +69,14 @@ modelos, repositorios, estado y widgets.
 ## Estado actual
 
 La estructura inicial implementada es `app/` (configuración y rutas),
-`core/widgets/` (estados reutilizables de carga y error) y
-`features/home/` (pantalla inicial). `AppUae` registra la ruta de inicio y
-muestra un estado de error con una acción para rutas no registradas. Las demás
-features se crearán conforme se definan sus funciones; no es necesario crear
-módulos vacíos por adelantado.
+`core/widgets/` (estados reutilizables de carga y error),
+`features/home/` (pantalla inicial) y `features/auth/` (base de sesión).
+`AppUae` registra la ruta de inicio y muestra un estado de error con una acción
+para rutas no registradas.
+
+La base de sesión aún no está conectada a pantallas ni a una API: no permite
+iniciar sesión todavía. En Android/iOS `SecureSessionStore` usa almacenamiento
+seguro del dispositivo; no se habilita persistencia en web u otras plataformas.
+En Android se desactivó la copia de seguridad automática para evitar restaurar
+datos cifrados sin sus claves. Consulta el [estado y guía de integración de
+F2-01](../../docs/modules/f2-01-sesion.md).
