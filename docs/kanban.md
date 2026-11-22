@@ -30,8 +30,8 @@ Estados: `Backlog` -> `Por hacer` -> `En progreso` -> `En revisión` -> `Hecho`.
 |---|---|---|---|
 | F2-01 | Login, sesión expirada y perfil | CRYXZ + Donovan | En progreso ([detalle](modules/f2-01-sesion.md)) |
 | F2-02 | Inicio con tarjetas y accesos rápidos | Donovan | Por hacer |
-| F2-03 | Horarios filtrados por carrera/grupo | Donovan + CRYXZ | Por hacer |
-| F2-04 | Materias, tareas y progreso | Donovan | Por hacer |
+| F2-03 | Modelo y horarios de demostración; filtro API por usuario pendiente | Donovan + CRYXZ | En progreso |
+| F2-04 | Modelo SQL de tareas, estados y progreso; API y pantalla pendientes | Donovan | En progreso |
 | F2-05 | Avisos segmentados | Camila + CRYXZ | Por hacer |
 | F2-06 | Votaciones y resultados | Camila + CRYXZ | Por hacer |
 | F2-07 | Pruebas de flujos académicos | Carlos | Por hacer |
