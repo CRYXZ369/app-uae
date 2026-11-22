@@ -205,8 +205,57 @@ void main() {
 
     expect(store.session, isNull);
     expect(store.didClear, isTrue);
+    expect(find.text('Sesión expirada'), findsOneWidget);
+    await tester.tap(find.text('Iniciar sesión'));
+    await tester.pumpAndSettle();
     expect(find.text('Iniciar sesión'), findsOneWidget);
   });
+
+  testWidgets('una sesión activa expira y vuelve al formulario', (
+    tester,
+  ) async {
+    var now = DateTime.utc(2026, 1, 1);
+    final store = FakeSessionStore(
+      AuthSession(
+        accessToken: 'token-ficticio',
+        email: 'alumno@ejemplo.edu',
+        expiresAt: now.add(const Duration(seconds: 5)),
+      ),
+    );
+    await tester.pumpWidget(AppUae(sessionStore: store, clock: () => now));
+    await tester.pumpAndSettle();
+    expect(find.text('Cerrar sesión'), findsOneWidget);
+
+    now = now.add(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    expect(store.session, isNull);
+    expect(find.text('Sesión expirada'), findsOneWidget);
+    await tester.tap(find.text('Iniciar sesión'));
+    await tester.pumpAndSettle();
+    expect(find.text('Correo institucional'), findsOneWidget);
+  });
+
+  testWidgets(
+    'si falla el borrado de una sesión expirada se permite reintentar',
+    (tester) async {
+      final store = FakeSessionStore(
+        AuthSession(
+          accessToken: 'token-ficticio',
+          email: 'docente@ejemplo.edu',
+          expiresAt: DateTime.utc(2020),
+        ),
+      )..failClears = true;
+      await tester.pumpWidget(AppUae(sessionStore: store));
+      await tester.pumpAndSettle();
+      expect(find.text('No se pudo recuperar la sesión'), findsOneWidget);
+      store.failClears = false;
+      await tester.tap(find.text('Reintentar'));
+      await tester.pumpAndSettle();
+      expect(store.session, isNull);
+      expect(find.text('Sesión expirada'), findsOneWidget);
+    },
+  );
 
   testWidgets('muestra error si falla la lectura del almacenamiento seguro', (
     tester,

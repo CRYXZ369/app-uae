@@ -86,3 +86,6 @@ La estructura inicial implementada incluye `app/` (entrada y control de sesión)
 reutilizables) y `features/auth/` y `features/home/`. Las demás features se
 crearán conforme se definan sus funciones; no es necesario crear módulos vacíos
 por adelantado.
+
+En Android se desactivó la copia de seguridad automática para evitar restaurar
+datos cifrados sin sus claves. Consulta el [estado de F2-01](../../docs/modules/f2-01-sesion.md).

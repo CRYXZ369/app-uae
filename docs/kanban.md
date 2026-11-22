@@ -28,7 +28,7 @@ Estados: `Backlog` -> `Por hacer` -> `En progreso` -> `En revisión` -> `Hecho`.
 
 | ID | Actividad | Responsable | Estado |
 |---|---|---|---|
-| F2-01 | Login, sesión expirada y perfil | CRYXZ + Donovan | Por hacer |
+| F2-01 | Login, sesión expirada y perfil | CRYXZ + Donovan | En progreso ([detalle](modules/f2-01-sesion.md)) |
 | F2-02 | Inicio con tarjetas y accesos rápidos | Donovan | Por hacer |
 | F2-03 | Modelo y horarios de demostración; filtro API por usuario pendiente | Donovan + CRYXZ | En progreso |
 | F2-04 | Modelo SQL de tareas, estados y progreso; API y pantalla pendientes | Donovan | En progreso |
