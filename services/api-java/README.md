@@ -17,11 +17,29 @@ de sesiones vencidas, observabilidad y política institucional de usuarios.
    difieren en mayúsculas, resolverlos antes de aplicarla. No ejecutarla sin autorización en una base
    compartida o de producción. La tabla de sesiones activa RLS sin políticas
    públicas; el rol de conexión de la API necesita acceso autorizado a ella.
-2. Configurar `DB_URL`, `DB_USER` y `DB_PASSWORD` como variables del entorno,
-   y opcionalmente `SERVER_PORT` (por defecto 8080). La API no lee `.env`
-   automáticamente. Para una base remota, `DB_URL` debe incluir
-   `?sslmode=verify-full` y Java/PostgreSQL debe confiar en su CA.
-   No publicar el archivo `.env`, credenciales ni datos de usuarios.
+2. Crear la configuración local sin subir secretos al repositorio:
+
+   ```sh
+   cp services/api-java/.env.example services/api-java/.env
+   ```
+
+   Editar `.env` con el host, puerto, usuario y contraseña de la base de
+   desarrollo. Para Supabase, descargar el certificado CA desde Database
+   Settings → SSL Configuration y guardarlo como `~/.postgresql/root.crt`;
+   usar `sslmode=verify-full` en `DB_URL`. La API no carga `.env`
+   automáticamente, así que al iniciar desde la raíz exporta sus variables:
+
+   ```sh
+   set -a
+   source services/api-java/.env
+   set +a
+   export DEV_WEB_ORIGIN=http://127.0.0.1:8081
+   cd services/api-java
+   mvn spring-boot:run
+   ```
+
+   `.env` está excluido de Git. No publicar credenciales ni datos de usuarios.
+   `SERVER_PORT` es opcional y por defecto usa 8080.
 3. Las cuentas deben tener el hash `pbkdf2_sha256` compatible con
    `PasswordHasher` del cliente legado y roles en `roles`/`usuario_roles`.
    No se crean cuentas ni contraseñas automáticamente. Usar cuentas ficticias
