@@ -87,10 +87,11 @@ public class IdentityController {
             throws GeneralSecurityException {
         String token = bearer(authorization);
         if (token == null) return error(HttpStatus.UNAUTHORIZED, "INVALID_SESSION");
-        List<User> users = db.query("""
-            "SELECT u.id_usuario, u." + schema.emailColumn() + ", '' AS password_hash "
-            + "FROM sesiones_identidad s JOIN public.usuarios u ON u.id_usuario = s.id_usuario "
-            + "WHERE s.token_hash = ? AND s.expira_en > now()" + schema.userActiveFilter(),
+        String sql = "SELECT u.id_usuario, u." + schema.emailColumn()
+            + ", '' AS password_hash FROM sesiones_identidad s "
+            + "JOIN public.usuarios u ON u.id_usuario = s.id_usuario "
+            + "WHERE s.token_hash = ? AND s.expira_en > now()" + schema.userActiveFilter();
+        List<User> users = db.query(sql,
             (row, n) -> new User(row.getLong(1), row.getString(2), row.getString(3)), digest(token));
         if (users.isEmpty()) return error(HttpStatus.UNAUTHORIZED, "INVALID_SESSION");
         User user = users.get(0);
