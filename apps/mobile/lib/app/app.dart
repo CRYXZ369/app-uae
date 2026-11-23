@@ -7,16 +7,24 @@ import '../core/widgets/app_loading_screen.dart';
 import '../core/session/secure_session_store.dart';
 import '../core/session/session_store.dart';
 import '../features/auth/domain/auth_session.dart';
+import '../features/auth/data/identity_api.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/session_expired_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 
 class AppUae extends StatefulWidget {
-  const AppUae({super.key, this.sessionStore, this.onLogin, this.clock});
+  const AppUae({
+    super.key,
+    this.sessionStore,
+    this.onLogin,
+    this.clock,
+    this.identityApi,
+  });
 
   final SessionStore? sessionStore;
   final LoginHandler? onLogin;
   final DateTime Function()? clock;
+  final IdentityApi? identityApi;
 
   @override
   State<AppUae> createState() => _AppUaeState();
@@ -28,8 +36,12 @@ class _AppUaeState extends State<AppUae> {
   AuthSession? _session;
   bool _isRestoringSession = true;
   bool _sessionRestoreFailed = false;
+  bool _apiUnavailable = false;
   bool _sessionExpired = false;
   Timer? _expirationTimer;
+  static const _apiUrl = String.fromEnvironment('API_BASE_URL');
+  late final IdentityApi? _api =
+      widget.identityApi ?? (_apiUrl.isEmpty ? null : IdentityApi(_apiUrl));
 
   DateTime get _now => widget.clock?.call() ?? DateTime.now();
 
@@ -51,6 +63,7 @@ class _AppUaeState extends State<AppUae> {
       _session = null;
       _isRestoringSession = true;
       _sessionRestoreFailed = false;
+      _apiUnavailable = false;
     });
     try {
       await _sessionStore.clear();
@@ -71,6 +84,7 @@ class _AppUaeState extends State<AppUae> {
   @override
   void dispose() {
     _expirationTimer?.cancel();
+    if (widget.identityApi == null) _api?.close();
     super.dispose();
   }
 
@@ -84,11 +98,18 @@ class _AppUaeState extends State<AppUae> {
     setState(() {
       _isRestoringSession = true;
       _sessionRestoreFailed = false;
+      _apiUnavailable = false;
     });
 
     try {
       var session = await _sessionStore.read();
-      final expired = session != null && !session.expiresAt.isAfter(_now);
+      var expired = session != null && !session.expiresAt.isAfter(_now);
+      if (!expired && session != null && _api != null) {
+        expired = !await _api.isSessionValid(session.accessToken);
+      }
+      if (session != null && !session.expiresAt.isAfter(_now)) {
+        expired = true;
+      }
       if (expired) {
         await _sessionStore.clear();
         session = null;
@@ -103,6 +124,14 @@ class _AppUaeState extends State<AppUae> {
         _isRestoringSession = false;
       });
       if (session != null) _scheduleExpiration(session);
+    } on IdentityApiException {
+      if (mounted) {
+        setState(() {
+          _apiUnavailable = true;
+          _sessionRestoreFailed = true;
+          _isRestoringSession = false;
+        });
+      }
     } on SessionStorageException {
       if (mounted) {
         setState(() {
@@ -114,7 +143,7 @@ class _AppUaeState extends State<AppUae> {
   }
 
   Future<LoginResult> _login(String email, String password) async {
-    final handler = widget.onLogin;
+    final handler = widget.onLogin ?? _api?.login;
     final result = handler == null
         ? const LoginResult.unavailable()
         : await handler(email, password);
@@ -134,6 +163,13 @@ class _AppUaeState extends State<AppUae> {
           return const LoginResult.unavailable();
         }
       } on SessionStorageException {
+        if (_api != null && widget.onLogin == null) {
+          try {
+            await _api.revoke(session.accessToken);
+          } on IdentityApiException {
+            return const LoginResult.unavailable();
+          }
+        }
         return const LoginResult.sessionStorageFailure();
       }
       if (mounted) {
@@ -147,7 +183,15 @@ class _AppUaeState extends State<AppUae> {
   Future<void> _logout() async {
     _expirationTimer?.cancel();
     try {
+      final session = _session;
+      if (_api != null && session != null) {
+        await _api.revoke(session.accessToken);
+      }
       await _sessionStore.clear();
+    } on IdentityApiException {
+      final session = _session;
+      if (mounted && session != null) _scheduleExpiration(session);
+      throw const SessionStorageException();
     } on SessionStorageException {
       final session = _session;
       if (mounted && session != null) _scheduleExpiration(session);
@@ -171,7 +215,9 @@ class _AppUaeState extends State<AppUae> {
           : _sessionRestoreFailed
           ? AppErrorScreen(
               title: 'No se pudo recuperar la sesión',
-              message: 'No fue posible acceder al almacenamiento seguro del dispositivo.',
+              message: _apiUnavailable
+                  ? 'No fue posible verificar la sesión con el servicio.'
+                  : 'No fue posible acceder al almacenamiento seguro del dispositivo.',
               actionLabel: 'Reintentar',
               onAction: (_) => _restoreSession(),
             )

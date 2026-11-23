@@ -97,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
       case LoginStatus.unavailable:
         setState(
           () => _errorMessage =
-              'El inicio de sesión aún no está conectado al servicio.',
+              'No se pudo conectar al servicio de inicio de sesión.',
         );
       case LoginStatus.sessionStorageFailure:
         setState(

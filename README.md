@@ -2,7 +2,7 @@
 
 Proyecto colaborativo de 5.º semestre de Ingeniería en Tecnologías de la Información de la Universidad Albert Einstein. El objetivo es construir una plataforma móvil institucional para estudiantes, docentes, trabajadores, directivos y áreas administrativas: un solo lugar para la vida académica, transporte, compras, pagos, avisos y participación universitaria.
 
-La aplicación móvil tiene una base inicial en **Flutter** y consumirá una **API REST Java** aún pendiente de implementar. La persistencia objetivo es **PostgreSQL administrado por Supabase**. La aplicación Java Swing existente se conserva como legado de referencia mientras se migra la lógica al backend; no se debe agregar funcionalidad nueva allí. Para ejecutar la base móvil, consulta [su guía](apps/mobile/README.md).
+La aplicación móvil tiene una base inicial en **Flutter** y una **API REST Java** de identidad para desarrollo local; los demás módulos y el despliegue seguro están pendientes. La persistencia objetivo es **PostgreSQL administrado por Supabase**. La aplicación Java Swing existente se conserva como legado de referencia mientras se migra la lógica al backend; no se debe agregar funcionalidad nueva allí. Para ejecutar la base móvil, consulta [su guía](apps/mobile/README.md).
 <img width="1160" height="712" alt="image" src="https://github.com/user-attachments/assets/cb15fe27-3762-4d6c-aa9f-eb5941be2265" />
 
 ## Alcance del producto
@@ -51,7 +51,17 @@ La documentación complementaria del equipo está en la carpeta compartida de [G
 
 ## Base de datos PostgreSQL / Supabase
 
-Supabase utiliza PostgreSQL. El esquema de referencia está en `database/01_ddl_app_unificada_uae_postgres.sql`. Ejecútelo en el SQL Editor de un proyecto de desarrollo de Supabase o con `psql`. No sustituya el proyecto de Supabase de otra persona ni ejecute migraciones destructivas sin respaldo.
+Supabase utiliza PostgreSQL. Para una instalación nueva o para completar el esquema existente, aplica en este orden desde el SQL Editor de Supabase o con `psql`:
+
+1. `database/01_ddl_app_unificada_uae_postgres.sql`
+2. `database/02_ddl_compatibilidad_supabase.sql` — conserva `clave`, `codigo_grupo` y `semestre`, y mantiene sus alias sincronizados con el modelo de la app.
+3. `database/03_ddl_academico_postgres.sql`
+4. `database/04_dml_academico_demo_postgres.sql`
+5. `database/05_ddl_tareas_academicas_postgres.sql`
+6. `database/06_dml_tareas_demo_postgres.sql`
+7. `database/07_ddl_sesiones_identidad_postgres.sql`
+
+Las migraciones son acumulativas; no edites las ya aplicadas. `02` y `04` son repetibles. Ejecuta `07` una sola vez. Usa una base de desarrollo y conserva un respaldo antes de aplicarlas.
 
 `database/01_ddl_app_unificada_uae.sql` es el esquema histórico de MySQL y se conserva únicamente como referencia del prototipo anterior. Los datos de desarrollo deben adaptarse a PostgreSQL antes de ejecutarse. No use credenciales de administrador ni publique claves de Supabase.
 

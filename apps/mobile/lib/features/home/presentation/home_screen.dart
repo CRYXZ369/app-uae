@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() {
           _isLoggingOut = false;
-          _errorMessage = 'No se pudo cerrar la sesión de forma segura. Inténtalo de nuevo.';
+          _errorMessage = 'No se pudo cerrar la sesión en el servicio o en el dispositivo. Inténtalo de nuevo.';
         });
       }
     }
