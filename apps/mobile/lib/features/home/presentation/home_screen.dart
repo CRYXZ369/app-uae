@@ -1,13 +1,20 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/session/session_store.dart';
+import '../../grades/domain/course_grade_summary.dart';
 import '../../grades/presentation/course_grades_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({required this.onLogout, required this.email, super.key});
+  const HomeScreen({
+    required this.onLogout,
+    required this.email,
+    required this.loadCourseGrades,
+    super.key,
+  });
 
   final Future<void> Function() onLogout;
   final String email;
+  final Future<List<CourseGradeSummary>> Function() loadCourseGrades;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -46,7 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (title == 'Calificaciones') {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => const CourseGradesScreen(courses: []),
+          builder: (_) =>
+              CourseGradesScreen(loadCourses: widget.loadCourseGrades),
         ),
       );
       return;
