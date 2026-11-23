@@ -6,10 +6,16 @@
   grupos y docentes, tareas, estados por estudiante, notificaciones y vistas.
 - `database/06_dml_tareas_demo_postgres.sql`: tres tareas de ejemplo por grupo
   para probar tareas próximas, lejanas y vencidas.
+- `database/07_ddl_calificaciones_academicas_postgres.sql` y
+  `database/08_dml_calificaciones_demo_postgres.sql`: evaluación porcentual y
+  sus entregables demo sin calificaciones.
 - `database/tests/tareas_academicas_postgres.sql`: pruebas de aislamiento para
   Turismo e ITI, asignación docente, estados, tareas próximas y notificaciones.
   La prueba inserta datos temporales dentro de una transacción y termina con
   `ROLLBACK`.
+- `database/tests/calificaciones_academicas_postgres.sql`: pruebas de
+  calificaciones, disponibles después de aplicar el esquema y el seed de
+  evaluación.
 - `services/api-java`: aquí deberá implementarse el acceso autenticado y los
   endpoints. La API aún no está conectada a este modelo.
 - `apps/mobile/lib/features/academic`: aquí deberá integrarse la interfaz
@@ -46,6 +52,9 @@ base PostgreSQL de desarrollo:
 4. `database/05_ddl_tareas_academicas_postgres.sql`
 5. `database/06_dml_tareas_demo_postgres.sql`
 6. `database/tests/tareas_academicas_postgres.sql`
+7. `database/07_ddl_calificaciones_academicas_postgres.sql`
+8. `database/08_dml_calificaciones_demo_postgres.sql`
+9. `database/tests/calificaciones_academicas_postgres.sql`
 
 La prueba final debe terminar con `ROLLBACK` y no dejar cuentas, entregas,
 tareas ni notificaciones de QA. Los datos del seed son ficticios, no tareas
