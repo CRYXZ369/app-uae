@@ -227,7 +227,7 @@ class _AppUaeState extends State<AppUae> {
             )
           : _session == null
           ? LoginScreen(onLogin: _login)
-          : HomeScreen(onLogout: _logout),
+          : HomeScreen(onLogout: _logout, email: _session!.email),
       onUnknownRoute: (_) => MaterialPageRoute<void>(
         builder: (_) => AppErrorScreen(
           title: 'Pantalla no encontrada',
