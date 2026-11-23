@@ -306,7 +306,8 @@ WITH horario_base AS (
   JOIN aulas aula
     ON aula.codigo = c.codigo || '-A' ||
       LPAD(asignacion.secuencia::TEXT, 2, '0')
-  WHERE NOT (c.codigo = 'ITI' AND g.numero_semestre = 7)
+  WHERE g.periodo_escolar = 'DEMO'
+    AND NOT (c.codigo = 'ITI' AND g.numero_semestre = 7)
 )
 INSERT INTO horarios_academicos (
   id_grupo, id_carrera, numero_semestre, id_materia, id_taller,
@@ -354,7 +355,8 @@ WITH grupos_taller AS (
            AS orden_grupo
   FROM grupos g
   JOIN carreras c ON c.id_carrera = g.id_carrera
-  WHERE g.numero_semestre BETWEEN 1 AND 6
+  WHERE g.periodo_escolar = 'DEMO'
+    AND g.numero_semestre BETWEEN 1 AND 6
 ),
 asignaciones AS (
   SELECT grupo.*,
@@ -439,6 +441,7 @@ JOIN carreras carrera ON carrera.codigo = 'ITI'
 JOIN grupos grupo
   ON grupo.id_carrera = carrera.id_carrera
   AND grupo.numero_semestre = 7
+  AND grupo.periodo_escolar = 'DEMO'
 JOIN docentes docente ON docente.codigo = plan.codigo_docente
 JOIN aulas aula ON aula.codigo = plan.codigo_aula
 ON CONFLICT (id_grupo, dia_semana, hora_inicio) DO UPDATE
