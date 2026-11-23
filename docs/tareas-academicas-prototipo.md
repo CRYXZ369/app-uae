@@ -47,14 +47,19 @@ Ejecutar en este orden, desde la raíz del monorepo o en el editor SQL de una
 base PostgreSQL de desarrollo:
 
 1. `database/01_ddl_app_unificada_uae_postgres.sql`
-2. `database/03_ddl_academico_postgres.sql`
-3. `database/04_dml_academico_demo_postgres.sql`
-4. `database/05_ddl_tareas_academicas_postgres.sql`
-5. `database/06_dml_tareas_demo_postgres.sql`
-6. `database/tests/tareas_academicas_postgres.sql`
+2. `database/02_ddl_compatibilidad_supabase.sql`
+3. `database/03_ddl_academico_postgres.sql`
+4. `database/04_dml_academico_demo_postgres.sql`
+5. `database/05_ddl_tareas_academicas_postgres.sql`
+6. `database/06_dml_tareas_demo_postgres.sql`
 7. `database/07_ddl_calificaciones_academicas_postgres.sql`
 8. `database/08_dml_calificaciones_demo_postgres.sql`
-9. `database/tests/calificaciones_academicas_postgres.sql`
+9. `database/09_ddl_sesiones_identidad_postgres.sql`
+
+Después de aplicar las migraciones, ejecutar según corresponda:
+
+- `database/tests/tareas_academicas_postgres.sql`
+- `database/tests/calificaciones_academicas_postgres.sql`
 
 La prueba final debe terminar con `ROLLBACK` y no dejar cuentas, entregas,
 tareas ni notificaciones de QA. Los datos del seed son ficticios, no tareas

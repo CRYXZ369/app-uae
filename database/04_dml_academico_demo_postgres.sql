@@ -18,12 +18,19 @@ INSERT INTO semestres (numero, nombre, tiene_taller_semanal) VALUES
   (4, '4to semestre', TRUE),
   (5, '5to semestre', TRUE),
   (6, '6to semestre', TRUE),
-  (7, '7mo semestre', FALSE)
+  (7, '7mo semestre', FALSE),
+  (8, '8vo semestre', FALSE),
+  (9, '9no semestre', FALSE),
+  (10, '10mo semestre', FALSE),
+  (11, '11vo semestre', FALSE),
+  (12, '12vo semestre', FALSE)
 ON CONFLICT (numero) DO UPDATE
 SET nombre = EXCLUDED.nombre,
     tiene_taller_semanal = EXCLUDED.tiene_taller_semanal;
 
-INSERT INTO grupos (id_carrera, numero_semestre, codigo, nombre)
+INSERT INTO grupos (
+  id_carrera, numero_semestre, codigo, nombre, periodo_escolar
+)
 SELECT c.id_carrera,
        s.numero,
        'S' || s.numero || '-A',
@@ -35,11 +42,12 @@ SELECT c.id_carrera,
          WHEN 5 THEN '5to'
          WHEN 6 THEN '6to'
          WHEN 7 THEN '7mo'
-       END || ' A'
+       END || ' A',
+       'DEMO'
 FROM carreras c
 CROSS JOIN semestres s
 WHERE c.codigo IN ('ITI', 'TUR', 'ADM')
-ON CONFLICT (id_carrera, numero_semestre, codigo) DO UPDATE
+ON CONFLICT (id_carrera, numero_semestre, codigo, periodo_escolar) DO UPDATE
 SET nombre = EXCLUDED.nombre,
     activo = TRUE;
 
@@ -298,7 +306,8 @@ WITH horario_base AS (
   JOIN aulas aula
     ON aula.codigo = c.codigo || '-A' ||
       LPAD(asignacion.secuencia::TEXT, 2, '0')
-  WHERE NOT (c.codigo = 'ITI' AND g.numero_semestre = 7)
+  WHERE g.periodo_escolar = 'DEMO'
+    AND NOT (c.codigo = 'ITI' AND g.numero_semestre = 7)
 )
 INSERT INTO horarios_academicos (
   id_grupo, id_carrera, numero_semestre, id_materia, id_taller,
@@ -346,7 +355,8 @@ WITH grupos_taller AS (
            AS orden_grupo
   FROM grupos g
   JOIN carreras c ON c.id_carrera = g.id_carrera
-  WHERE g.numero_semestre BETWEEN 1 AND 6
+  WHERE g.periodo_escolar = 'DEMO'
+    AND g.numero_semestre BETWEEN 1 AND 6
 ),
 asignaciones AS (
   SELECT grupo.*,
@@ -431,6 +441,7 @@ JOIN carreras carrera ON carrera.codigo = 'ITI'
 JOIN grupos grupo
   ON grupo.id_carrera = carrera.id_carrera
   AND grupo.numero_semestre = 7
+  AND grupo.periodo_escolar = 'DEMO'
 JOIN docentes docente ON docente.codigo = plan.codigo_docente
 JOIN aulas aula ON aula.codigo = plan.codigo_aula
 ON CONFLICT (id_grupo, dia_semana, hora_inicio) DO UPDATE

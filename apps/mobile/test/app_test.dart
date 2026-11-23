@@ -1,12 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:app_unificada_uae/app/app.dart';
 import 'package:app_unificada_uae/core/session/session_store.dart';
 import 'package:app_unificada_uae/core/widgets/app_error_screen.dart';
 import 'package:app_unificada_uae/core/widgets/app_loading_screen.dart';
 import 'package:app_unificada_uae/features/auth/domain/auth_session.dart';
+import 'package:app_unificada_uae/features/auth/data/identity_api.dart';
 import 'package:app_unificada_uae/features/auth/presentation/login_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:material_ui/material_ui.dart';
 
 final _testSession = AuthSession(
@@ -182,6 +186,56 @@ void main() {
     expect(find.text('Iniciar sesión'), findsOneWidget);
   });
 
+  testWidgets('conecta login y cierre a la API', (tester) async {
+    final requests = <String>[];
+    final api = IdentityApi(
+      'http://localhost:8080',
+      client: MockClient((request) async {
+        requests.add('${request.method} ${request.url.path}');
+        if (request.url.path.endsWith('/revoke')) {
+          expect(request.headers['Authorization'], 'Bearer access-token');
+          return http.Response('', 204);
+        }
+        return http.Response(jsonEncode(_testSession.toJson()), 200);
+      }),
+    );
+    addTearDown(api.close);
+    final store = FakeSessionStore();
+    await tester.pumpWidget(AppUae(sessionStore: store, identityApi: api));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Correo institucional'),
+      'alumno@uae.edu.mx',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Contraseña'),
+      'ficticia',
+    );
+    await tester.tap(find.text('Iniciar sesión'));
+    await tester.pumpAndSettle();
+    expect(store.session?.accessToken, 'access-token');
+    await tester.tap(find.text('Cerrar sesión'));
+    await tester.pumpAndSettle();
+    expect(store.session, isNull);
+    expect(requests, [
+      'POST /api/v1/sessions',
+      'POST /api/v1/sessions/current/revoke',
+    ]);
+  });
+
+  testWidgets('una sesión revocada se descarta al restaurar', (tester) async {
+    final api = IdentityApi(
+      'http://localhost:8080',
+      client: MockClient((_) async => http.Response('', 401)),
+    );
+    addTearDown(api.close);
+    final store = FakeSessionStore(_testSession);
+    await tester.pumpWidget(AppUae(sessionStore: store, identityApi: api));
+    await tester.pumpAndSettle();
+    expect(store.session, isNull);
+    expect(find.text('Sesión expirada'), findsOneWidget);
+  });
+
   testWidgets('restaura la sesión guardada al iniciar', (tester) async {
     await tester.pumpWidget(
       AppUae(sessionStore: FakeSessionStore(_testSession)),
@@ -311,7 +365,7 @@ void main() {
     expect(find.text('Cerrar sesión'), findsOneWidget);
     expect(
       find.text(
-        'No se pudo cerrar la sesión de forma segura. Inténtalo de nuevo.',
+        'No se pudo cerrar la sesión en el servicio o en el dispositivo. Inténtalo de nuevo.',
       ),
       findsOneWidget,
     );
@@ -336,7 +390,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('El inicio de sesión aún no está conectado al servicio.'),
+      find.text('No se pudo conectar al servicio de inicio de sesión.'),
       findsOneWidget,
     );
   });

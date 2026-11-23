@@ -10,8 +10,8 @@
   docente, talleres, duración y conflictos de horario. La prueba inserta
   usuarios temporales dentro de una transacción y termina con `ROLLBACK`.
 - `services/api-java`: aquí deberá implementarse la consulta del horario en
-  `academic` usando el ID del usuario autenticado. El servicio Java aún no está
-  implementado.
+  `academic` usando el ID del usuario autenticado. La API de horarios aún no
+  está implementada.
 - `apps/mobile/lib/features/academic`: aquí irá posteriormente la pantalla
   Flutter del horario. Esa feature aún no existe.
 
@@ -116,9 +116,10 @@ ORDER BY CASE h.dia_semana
 Aplicar en este orden:
 
 1. `database/01_ddl_app_unificada_uae_postgres.sql`
-2. `database/03_ddl_academico_postgres.sql`
-3. `database/04_dml_academico_demo_postgres.sql`
-4. `database/tests/horario_academico_postgres.sql`
+2. `database/02_ddl_compatibilidad_supabase.sql`
+3. `database/03_ddl_academico_postgres.sql`
+4. `database/04_dml_academico_demo_postgres.sql`
+5. `database/tests/horario_academico_postgres.sql`
 
 La prueba debe terminar con `ROLLBACK`; no deja las cuentas QA en la base. Para
 Supabase, revisar los permisos de la extensión `btree_gist` al aplicar la

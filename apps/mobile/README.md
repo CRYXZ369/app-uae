@@ -2,7 +2,7 @@
 
 Esta carpeta contiene la aplicación Flutter para Android/iOS de App Unificada UAE,
 una aplicación universitaria institucional. El inicio de sesión ya cuenta con
-formulario y estados de interfaz; la autenticación todavía requiere conectar la API.
+formulario y estados de interfaz; la autenticación usa la API local cuando se configura.
 
 ## Primer arranque
 
@@ -21,6 +21,17 @@ flutter test
 El proyecto se creó con Flutter stable 3.50.0. Cada integrante necesita su
 propio SDK; este no se comparte en Git. La primera descarga de dependencias
 requiere conexión a internet.
+
+Para probar el login en navegador con la API local configurada y en ejecución,
+inicia la API con `DEV_WEB_ORIGIN=http://127.0.0.1:8081` y después ejecuta:
+
+```sh
+flutter run -d web-server --web-hostname=127.0.0.1 --web-port=8081 \
+  --dart-define=API_BASE_URL=http://127.0.0.1:8080
+```
+
+La API debe estar preparada con una base y cuentas ficticias de desarrollo.
+La vista web no sustituye las pruebas de almacenamiento seguro en dispositivos.
 
 Para una vista previa rápida sin Android, ejecuta `flutter run -d web-server`
 y abre la dirección indicada en un navegador. La depuración con este modo es
@@ -73,11 +84,15 @@ tokens, correo y vencimiento obligatorio que entregue la API; nunca la contrase�
 iniciar, se restaura una sesión vigente y se descarta una sesión vencida. El
 inicio ofrece cerrar sesión y elimina el registro seguro local.
 
-La autenticación contra el servicio universitario todavía no está conectada:
-el envío muestra un aviso explícito hasta definir el endpoint y su respuesta
-(token, refresh token y vencimiento del access token). Tampoco hay endpoint de revocación; cerrar
-sesión borra la copia del dispositivo. No se debe llamar a SQL desde Flutter.
-Cada feature debe separar modelos, repositorios, estado y widgets.
+La autenticación puede conectarse a la API de desarrollo mediante
+`--dart-define=API_BASE_URL=http://127.0.0.1:8080`. Sin esa configuración o
+si el servicio no responde, se muestra un error. La API solo escucha en el
+equipo local; para web usar el mismo origen configurado en `DEV_WEB_ORIGIN`.
+HTTP solo se permite para localhost; una API remota requiere HTTPS. Las
+sesiones se verifican al restaurarse y se revocan en el servidor al cerrar
+sesión. Para el contrato y preparación consulta la
+[guía de la API](../../services/api-java/README.md). No se debe llamar a SQL
+desde Flutter.
 
 ## Estado actual
 

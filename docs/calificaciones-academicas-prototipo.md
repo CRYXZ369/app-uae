@@ -15,8 +15,8 @@
   vista de consulta, con aviso de estimación y sin controles para editar.
 - `apps/mobile/test/features/grades/course_grade_summary_test.dart`: pruebas
   de cálculo, escala, materias sin notas y pantalla de solo lectura.
-- `services/api-java`: aquí deberán implementarse los endpoints y la
-  autorización basada en la sesión real. La API aún no existe/conecta el
+- `services/api-java`: faltan los endpoints académicos y su autorización
+  basada en la sesión validada. La API de identidad aún no conecta este
   módulo.
 
 ## Checklist y decisiones para este prototipo
