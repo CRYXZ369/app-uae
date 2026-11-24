@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/session/session_store.dart';
+import '../../cafeteria/presentation/cafeteria_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({required this.onLogout, super.key});
@@ -72,6 +73,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 const Text(
                   'La aplicación está en desarrollo.',
                   textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CafeteriaScreen(
+                          userRole: 'ESTUDIANTE',
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.restaurant_menu),
+                  label: const Text('Pedidos de Cafetería'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  ),
                 ),
                 if (_errorMessage != null) ...[
                   const SizedBox(height: 16),
