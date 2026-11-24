@@ -33,9 +33,14 @@ typedef LoginHandler = Future<LoginResult> Function(
 );
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({required this.onLogin, super.key});
+  const LoginScreen({
+    required this.onLogin,
+    this.showEphemeralSessionNotice = false,
+    super.key,
+  });
 
   final LoginHandler onLogin;
+  final bool showEphemeralSessionNotice;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -331,6 +336,29 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ],
                                   ),
                           ),
+                          if (widget.showEphemeralSessionNotice) ...[
+                            const SizedBox(height: 16),
+                            const Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 17,
+                                  color: Color(0xff70819a),
+                                ),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Demo en red local: la sesión solo permanece mientras esta pestaña esté abierta.',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xff70819a),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ),

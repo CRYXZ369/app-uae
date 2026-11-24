@@ -96,8 +96,27 @@ void main() {
 
   test('rechaza HTTP remoto y direcciones mal configuradas', () {
     expect(() => IdentityApi('http://api.ejemplo.edu'), throwsArgumentError);
+    expect(() => IdentityApi('http://192.168.8.46:8080'), throwsArgumentError);
     expect(
       () => IdentityApi('https://api.ejemplo.edu/subruta'),
+      throwsArgumentError,
+    );
+  });
+
+  test('permite HTTP LAN solo al activar el modo demo local', () {
+    final api = IdentityApi(
+      'http://192.168.8.46:8080',
+      allowPrivateHttp: true,
+      client: MockClient((_) async => http.Response('', 200)),
+    );
+    addTearDown(api.close);
+
+    expect(
+      () => IdentityApi(
+        'http://8.8.8.8:8080',
+        allowPrivateHttp: true,
+        client: MockClient((_) async => http.Response('', 200)),
+      ),
       throwsArgumentError,
     );
   });

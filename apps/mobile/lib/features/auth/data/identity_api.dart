@@ -12,20 +12,38 @@ class IdentityApiException implements Exception {
 }
 
 class IdentityApi {
-  IdentityApi(String baseUrl, {http.Client? client})
-    : _baseUri = Uri.parse(baseUrl),
-      _client = client ?? http.Client() {
+  IdentityApi(
+    String baseUrl, {
+    http.Client? client,
+    bool allowPrivateHttp = false,
+  }) : _baseUri = Uri.parse(baseUrl),
+       _client = client ?? http.Client() {
     final loopback =
         _baseUri.host == 'localhost' || _baseUri.host == '127.0.0.1';
+    final privateLanHost = allowPrivateHttp && _isPrivateIpv4(_baseUri.host);
     if (!_baseUri.hasAuthority ||
         _baseUri.userInfo.isNotEmpty ||
         _baseUri.hasQuery ||
         _baseUri.hasFragment ||
         _baseUri.path != '' && _baseUri.path != '/' ||
         (_baseUri.scheme != 'https' &&
-            !(_baseUri.scheme == 'http' && loopback))) {
+            !(_baseUri.scheme == 'http' && (loopback || privateLanHost)))) {
       throw ArgumentError('La API requiere HTTPS o HTTP en localhost.');
     }
+  }
+
+  static bool _isPrivateIpv4(String host) {
+    final parts = host.split('.');
+    if (parts.length != 4) return false;
+    final octets = parts.map(int.tryParse).toList();
+    if (octets.any((value) => value == null || value < 0 || value > 255)) {
+      return false;
+    }
+    final first = octets[0]!;
+    final second = octets[1]!;
+    return first == 10 ||
+        first == 192 && second == 168 ||
+        first == 172 && second >= 16 && second <= 31;
   }
 
   final Uri _baseUri;

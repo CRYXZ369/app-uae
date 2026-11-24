@@ -52,9 +52,13 @@ de sesiones vencidas, observabilidad y política institucional de usuarios.
    mvn spring-boot:run
    ```
 
-Para navegador local, configurar opcionalmente `DEV_WEB_ORIGIN` como un origen
-exacto como `http://localhost:8081` y ejecutar Flutter en ese mismo origen.
-Solo se aceptan orígenes localhost; no se habilita CORS por defecto.
+Para navegador local, configurar `DEV_WEB_ORIGIN` (o varios orígenes separados
+por comas en `DEV_WEB_ORIGINS`) con el origen exacto del navegador. Se aceptan
+localhost y orígenes HTTP con IP privada para pruebas en una red local; no se
+habilita CORS por defecto. El servidor escucha solo en `127.0.0.1` por defecto.
+Para la demo entre teléfonos, establecer `SERVER_ADDRESS` a la IP Wi-Fi de la
+laptop y usar `LAN_DEMO_MODE=true` únicamente al iniciar Flutter web. Esto es
+para desarrollo local, no para desplegar la API en Internet.
 
 ## Contrato de identidad
 

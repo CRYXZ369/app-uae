@@ -1,10 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 class AppLoadingScreen extends StatelessWidget {
-  const AppLoadingScreen({
-    super.key,
-    this.message = 'Cargando...',
-  });
+  const AppLoadingScreen({super.key, this.message = 'Cargando...'});
 
   final String message;
 

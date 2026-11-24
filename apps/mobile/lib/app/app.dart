@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_ui/material_ui.dart';
 
 import '../core/widgets/app_error_screen.dart';
 import '../core/widgets/app_loading_screen.dart';
 import '../core/session/secure_session_store.dart';
+import '../core/session/memory_session_store.dart';
 import '../core/session/session_store.dart';
 import '../features/auth/domain/auth_session.dart';
 import '../features/auth/data/identity_api.dart';
@@ -31,8 +33,12 @@ class AppUae extends StatefulWidget {
 }
 
 class _AppUaeState extends State<AppUae> {
+  static const _lanDemoMode = bool.fromEnvironment('LAN_DEMO_MODE');
+  bool get _useEphemeralWebSession => kIsWeb && _lanDemoMode;
+
   late final SessionStore _sessionStore =
-      widget.sessionStore ?? SecureSessionStore();
+      widget.sessionStore ??
+      (_useEphemeralWebSession ? MemorySessionStore() : SecureSessionStore());
   AuthSession? _session;
   bool _isRestoringSession = true;
   bool _sessionRestoreFailed = false;
@@ -41,7 +47,10 @@ class _AppUaeState extends State<AppUae> {
   Timer? _expirationTimer;
   static const _apiUrl = String.fromEnvironment('API_BASE_URL');
   late final IdentityApi? _api =
-      widget.identityApi ?? (_apiUrl.isEmpty ? null : IdentityApi(_apiUrl));
+      widget.identityApi ??
+      (_apiUrl.isEmpty
+          ? null
+          : IdentityApi(_apiUrl, allowPrivateHttp: kIsWeb && _lanDemoMode));
 
   DateTime get _now => widget.clock?.call() ?? DateTime.now();
 
@@ -281,7 +290,10 @@ class _AppUaeState extends State<AppUae> {
               onSignIn: () => setState(() => _sessionExpired = false),
             )
           : _session == null
-          ? LoginScreen(onLogin: _login)
+          ? LoginScreen(
+              onLogin: _login,
+              showEphemeralSessionNotice: _useEphemeralWebSession,
+            )
           : HomeScreen(
               onLogout: _logout,
               email: _session!.email,
