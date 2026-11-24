@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class CourseGradeAssessment {
   const CourseGradeAssessment({
     required this.name,
@@ -8,6 +10,13 @@ class CourseGradeAssessment {
   final String name;
   final double weightPercentage;
   final double? grade;
+
+  factory CourseGradeAssessment.fromJson(Map<String, dynamic> json) =>
+      CourseGradeAssessment(
+        name: json['name'] as String,
+        weightPercentage: _number(json['weightPercentage']),
+        grade: json['grade'] == null ? null : _number(json['grade']),
+      );
 }
 
 class CourseGradeSummary {
@@ -81,4 +90,27 @@ class CourseGradeSummary {
   bool get isEstimate => estimatedAverage != null;
   bool get hasCompletePlan => (totalPlannedWeight - 100).abs() <= 0.005;
   static const double scaleMaximum = 100;
+
+  factory CourseGradeSummary.fromJson(Map<String, dynamic> json) {
+    final rawAssessments = json['assessments'];
+    final decoded = rawAssessments is String
+        ? jsonDecode(rawAssessments)
+        : rawAssessments;
+    if (decoded is! List) {
+      throw const FormatException('Evaluaciones inválidas.');
+    }
+    return CourseGradeSummary.fromAssessments(
+      courseName: json['materia'] as String,
+      assessments: decoded
+          .map(
+            (item) => CourseGradeAssessment.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(),
+    );
+  }
 }
+
+double _number(Object? value) =>
+    value is num ? value.toDouble() : double.parse(value.toString());

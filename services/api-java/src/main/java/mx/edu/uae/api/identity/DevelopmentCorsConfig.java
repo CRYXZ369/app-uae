@@ -21,6 +21,8 @@ public class DevelopmentCorsConfig implements WebMvcConfigurer {
         if (!origin.isEmpty()) {
             registry.addMapping("/api/v1/sessions/**").allowedOrigins(origin)
                 .allowedMethods("GET", "POST").allowedHeaders("Authorization", "Content-Type");
+            registry.addMapping("/api/v1/grades/**").allowedOrigins(origin)
+                .allowedMethods("GET").allowedHeaders("Authorization");
         }
     }
 }

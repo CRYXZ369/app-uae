@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../domain/auth_session.dart';
 import '../presentation/login_screen.dart';
+import '../../grades/domain/course_grade_summary.dart';
 
 class IdentityApiException implements Exception {
   const IdentityApiException();
@@ -105,6 +106,34 @@ class IdentityApi {
     } on http.ClientException {
       throw const IdentityApiException();
     } on TimeoutException {
+      throw const IdentityApiException();
+    }
+  }
+
+  Future<List<CourseGradeSummary>> getCourseGrades(String token) async {
+    try {
+      final request = http.Request(
+        'GET',
+        _baseUri.resolve('/api/v1/grades/courses'),
+      )..headers['Authorization'] = 'Bearer $token';
+      final streamed = await _client.send(request).timeout(_timeout);
+      final response = await http.Response.fromStream(streamed)
+          .timeout(_timeout);
+      if (response.statusCode != 200) throw const IdentityApiException();
+      final value = jsonDecode(response.body);
+      if (value is! List) throw const IdentityApiException();
+      return value
+          .map(
+            (item) => CourseGradeSummary.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false);
+    } on http.ClientException {
+      throw const IdentityApiException();
+    } on TimeoutException {
+      throw const IdentityApiException();
+    } on FormatException {
       throw const IdentityApiException();
     }
   }
