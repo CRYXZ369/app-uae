@@ -1,5 +1,20 @@
--- Historial ficticio para cuentas de estudiante de prueba solamente.
+-- Relaciones e historial ficticios para cuentas de prueba solamente.
 -- Aplicar después de 10_ddl_asistencia_academica_postgres.sql.
+
+-- Enlaza la cuenta docente ficticia a una asignación de demostración para
+-- habilitar la prueba de lista; no reemplaza docentes ya vinculados.
+UPDATE docentes d
+SET id_usuario = u.id_usuario
+FROM usuarios u
+WHERE u.correo_institucional = 'elena.vargas.prueba@uae.edu.mx'
+  AND d.id_docente = (
+    SELECT gm.id_docente
+    FROM grupo_materias_docentes gm
+    WHERE gm.id_grupo = 90
+    ORDER BY gm.id_materia
+    LIMIT 1
+  )
+  AND (d.id_usuario IS NULL OR d.id_usuario = u.id_usuario);
 
 INSERT INTO asistencias_academicas (
   id_horario, id_usuario, fecha_clase, estado

@@ -124,6 +124,13 @@ public class AcademicReadController {
             LEFT JOIN usuario_roles ur ON ur.id_usuario=u.id_usuario
             LEFT JOIN roles r ON r.id_rol=ur.id_rol
             WHERE d.id_usuario=?
+              AND EXISTS (
+                SELECT 1 FROM usuarios enrolled
+                JOIN usuario_roles enrolled_role ON enrolled_role.id_usuario=enrolled.id_usuario
+                JOIN roles student_role ON student_role.id_rol=enrolled_role.id_rol
+                WHERE enrolled.id_grupo=h.id_grupo AND enrolled.activo
+                  AND student_role.codigo='ESTUDIANTE' AND student_role.activo
+              )
             GROUP BY h.id_horario,h.dia_semana,h.hora_inicio,h.hora_fin,m.nombre,t.nombre,g.nombre
             ORDER BY h.dia_semana,h.hora_inicio
             """, id));
