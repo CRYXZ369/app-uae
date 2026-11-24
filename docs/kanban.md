@@ -51,8 +51,8 @@ Estados: `Backlog` -> `Por hacer` -> `En progreso` -> `En revisión` -> `Hecho`.
 
 | ID | Actividad | Responsable | Estado |
 |---|---|---|---|
-| F4-01 | Menús separados de ambas cafeterías | Camila + Kike | Por hacer |
-| F4-02 | Carrito y pedido prototipo | Donovan + Kike | Por hacer |
+| F4-01 | Menú ilustrativo en Flutter; faltan menús oficiales, dos ubicaciones, disponibilidad y API | Camila + Kike | En progreso |
+| F4-02 | Carrito y confirmación de pedido demo locales; falta persistencia y flujo con cocina | Donovan + Kike | En progreso |
 | F4-03 | Catálogo de descuentos externos | Camila | Por hacer |
 | F4-04 | Mensualidades y estados de cuenta | CRYXZ | Por hacer |
 | F4-05 | Catálogo de servicios y constancias | CRYXZ | Por hacer |

@@ -187,6 +187,26 @@ void main() {
     expect(find.text('Iniciar sesión'), findsOneWidget);
   });
 
+  testWidgets('estudiante abre la cafetería de demostración desde Inicio', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      AppUae(sessionStore: FakeSessionStore(_testSession)),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Cafetería'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cafetería UAE'), findsOneWidget);
+    expect(
+      find.text(
+        'Menú y precios de demostración. Los pedidos no se envían a la cafetería.',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('conecta login y cierre a la API', (tester) async {
     final requests = <String>[];
     final api = IdentityApi(
