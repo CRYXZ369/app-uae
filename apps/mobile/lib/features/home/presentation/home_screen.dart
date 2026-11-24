@@ -246,7 +246,14 @@ class _HomeScreenState extends State<HomeScreen> {
     slivers: [
       SliverToBoxAdapter(
         child: Container(
-          color: const Color(0xff2949b4),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xff19395f), Color(0xff315f9d)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+          ),
           padding: EdgeInsets.fromLTRB(
             compact ? 20 : 36,
             18,
@@ -258,20 +265,50 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Row(
                 children: [
-                  const Text(
-                    'MI CAMPUS',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1,
+                  const CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.school_rounded,
+                      color: Color(0xff214b78),
+                      size: 20,
                     ),
                   ),
+                  const SizedBox(width: 9),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'UNIVERSIDAD ALBERT EINSTEIN',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: .7,
+                        ),
+                      ),
+                      Text(
+                        'Mi Campus Pro',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                   const Spacer(),
-                  IconButton(
-                    onPressed: () => _open('Notificaciones'),
-                    color: Colors.white,
-                    icon: const Icon(Icons.notifications_none),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: .13),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: IconButton(
+                      tooltip: 'Notificaciones',
+                      onPressed: () => _open('Notificaciones'),
+                      color: Colors.white,
+                      icon: const Icon(Icons.notifications_none),
+                    ),
                   ),
                   TextButton.icon(
                     onPressed: _isLoggingOut ? null : _logout,
@@ -280,7 +317,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? const SizedBox(
                             width: 16,
                             height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
                         : const Icon(Icons.logout, size: 18),
                     label: Text(
@@ -297,25 +337,38 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
               Text(
+                'Buenos días,',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
                 '¡Hola, $_firstName!',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 27,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 29,
+                  fontWeight: FontWeight.w700,
+                  height: 1.15,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 5),
               const Text(
-                'Todo listo para un gran día.',
-                style: TextStyle(color: Colors.white70),
+                'Tu espacio académico digital',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
               ),
               const SizedBox(height: 18),
               Card(
                 color: Colors.white,
+                margin: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(17),
+                ),
                 child: ListTile(
                   leading: const CircleAvatar(
-                    backgroundColor: Color(0xffe3edff),
-                    child: Icon(Icons.person, color: Color(0xff2949b4)),
+                    backgroundColor: Color(0xffe9f0fb),
+                    child: Icon(Icons.person_outline, color: Color(0xff214b78)),
                   ),
                   title: Text(
                     _roleTitle,
@@ -343,13 +396,13 @@ class _HomeScreenState extends State<HomeScreen> {
         sliver: SliverList.list(
           children: [
             _MetricCard(
-              title: 'Sesión activa',
-              value: _roleTitle,
-              icon: Icons.dashboard_outlined,
+              title: 'Estado de tu cuenta',
+              value: 'Activa',
+              icon: Icons.verified_user_outlined,
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 18),
             Text(
-              _isStudent ? 'Tu universidad, a un toque' : 'Accesos de tu área',
+              _isStudent ? 'Accesos rápidos' : 'Accesos de tu área',
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
@@ -357,17 +410,24 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            Row(
-              children: [
-                for (final module in _modules.take(5))
-                  Expanded(
+            SizedBox(
+              height: 94,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _modules.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 9),
+                itemBuilder: (context, index) {
+                  final module = _modules[index];
+                  return SizedBox(
+                    width: 76,
                     child: _Shortcut(
                       label: module,
                       icon: _iconFor(module),
                       onTap: () => _open(module),
                     ),
-                  ),
-              ],
+                  );
+                },
+              ),
             ),
             if (_isStudent)
               Card(
@@ -439,27 +499,31 @@ class _MetricCard extends StatelessWidget {
   final IconData icon;
   @override
   Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(fontSize: 12)),
-          const SizedBox(height: 7),
-          Row(
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              Icon(icon, color: const Color(0xff3159c8)),
-            ],
-          ),
-        ],
+    child: ListTile(
+      leading: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: const Color(0xffe9f5ef),
+          borderRadius: BorderRadius.circular(13),
+        ),
+        child: Icon(icon, color: const Color(0xff27845a)),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 12, color: Color(0xff6d7c91)),
+      ),
+      subtitle: Text(
+        value,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: Color(0xff243953),
+        ),
+      ),
+      trailing: const Text(
+        '●',
+        style: TextStyle(color: Color(0xff35a66d), fontSize: 13),
       ),
     ),
   );
@@ -476,22 +540,37 @@ class _Shortcut extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => InkWell(
+    borderRadius: BorderRadius.circular(16),
     onTap: onTap,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xffe8edf4)),
+      ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircleAvatar(
-            backgroundColor: Colors.white,
-            foregroundColor: const Color(0xff3159c8),
-            child: Icon(icon, size: 21),
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: const Color(0xffeaf1ff),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 20, color: const Color(0xff315d96)),
           ),
           const SizedBox(height: 6),
           Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 9),
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: Color(0xff42546b),
+            ),
           ),
         ],
       ),
