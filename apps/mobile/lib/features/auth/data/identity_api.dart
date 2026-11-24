@@ -138,5 +138,41 @@ class IdentityApi {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getAcademicModule(
+    String token,
+    String module,
+  ) async {
+    const paths = {
+      'Materias': 'subjects',
+      'Horarios': 'schedule',
+      'Tareas': 'tasks',
+      'Notificaciones': 'notifications',
+      'Perfil': 'profile',
+    };
+    final path = paths[module];
+    if (path == null) throw ArgumentError.value(module, 'module');
+    try {
+      final request = http.Request(
+        'GET',
+        _baseUri.resolve('/api/v1/academic/$path'),
+      )..headers['Authorization'] = 'Bearer $token';
+      final streamed = await _client.send(request).timeout(_timeout);
+      final response = await http.Response.fromStream(streamed)
+          .timeout(_timeout);
+      if (response.statusCode != 200) throw const IdentityApiException();
+      final value = jsonDecode(response.body);
+      if (value is! List) throw const IdentityApiException();
+      return value
+          .map((row) => Map<String, dynamic>.from(row as Map))
+          .toList(growable: false);
+    } on http.ClientException {
+      throw const IdentityApiException();
+    } on TimeoutException {
+      throw const IdentityApiException();
+    } on FormatException {
+      throw const IdentityApiException();
+    }
+  }
+
   void close() => _client.close();
 }

@@ -3,18 +3,22 @@ import 'package:material_ui/material_ui.dart';
 import '../../../core/session/session_store.dart';
 import '../../grades/domain/course_grade_summary.dart';
 import '../../grades/presentation/course_grades_screen.dart';
+import '../../academic/presentation/academic_module_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
     required this.onLogout,
     required this.email,
     required this.loadCourseGrades,
+    required this.loadAcademicModule,
     super.key,
   });
 
   final Future<void> Function() onLogout;
   final String email;
   final Future<List<CourseGradeSummary>> Function() loadCourseGrades;
+  final Future<List<Map<String, dynamic>>> Function(String module)
+  loadAcademicModule;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -55,6 +59,23 @@ class _HomeScreenState extends State<HomeScreen> {
         MaterialPageRoute<void>(
           builder: (_) =>
               CourseGradesScreen(loadCourses: widget.loadCourseGrades),
+        ),
+      );
+      return;
+    }
+    if (const {
+      'Materias',
+      'Horarios',
+      'Tareas',
+      'Notificaciones',
+      'Perfil',
+    }.contains(title)) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => AcademicModuleScreen(
+            title: title,
+            loadRows: () => widget.loadAcademicModule(title),
+          ),
         ),
       );
       return;
@@ -303,6 +324,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _otherTab(bool compact) {
     final title = ['Inicio', 'Materias', 'Notificaciones', 'Perfil'][_tab];
+    if (title != 'Inicio') {
+      return AcademicModuleScreen(
+        title: title,
+        loadRows: () => widget.loadAcademicModule(title),
+      );
+    }
     return _ModulePage(
       title: title,
       icon: _iconFor(title),

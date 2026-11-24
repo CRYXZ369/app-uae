@@ -232,6 +232,8 @@ class _AppUaeState extends State<AppUae> {
               email: _session!.email,
               loadCourseGrades: () =>
                   _api!.getCourseGrades(_session!.accessToken),
+              loadAcademicModule: (module) =>
+                  _api!.getAcademicModule(_session!.accessToken, module),
             ),
       onUnknownRoute: (_) => MaterialPageRoute<void>(
         builder: (_) => AppErrorScreen(
