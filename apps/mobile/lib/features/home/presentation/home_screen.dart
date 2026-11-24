@@ -5,6 +5,7 @@ import '../../grades/domain/course_grade_summary.dart';
 import '../../grades/presentation/course_grades_screen.dart';
 import '../../academic/presentation/academic_module_screen.dart';
 import '../../academic/presentation/teacher_attendance_screen.dart';
+import '../../transport/presentation/transport_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -67,7 +68,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (_isStudent) {
-      add(['Materias', 'Calificaciones', 'Horarios', 'Tareas', 'Asistencia']);
+      add([
+        'Materias',
+        'Calificaciones',
+        'Horarios',
+        'Tareas',
+        'Asistencia',
+        'Transporte',
+      ]);
     }
     if (_roleSet.contains('DOCENTE')) {
       add(['Horarios', 'Materias', 'Tareas', 'Asistencia']);
@@ -106,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<String> get _navigationModules {
-    if (_isStudent) return ['Materias', 'Notificaciones', 'Perfil'];
+    if (_isStudent) return ['Materias', 'Transporte', 'Perfil'];
     if (_roleSet.contains('DOCENTE')) {
       return ['Horarios', 'Asistencia', 'Perfil'];
     }
@@ -144,6 +152,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _open(String title) {
+    if (title == 'Transporte') {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => const TransportScreen()));
+      return;
+    }
     if (title == 'Asistencia' && _roleSet.contains('DOCENTE')) {
       Navigator.of(context)
           .push(MaterialPageRoute<void>(builder: (_) => _moduleScreen(title)));
@@ -192,6 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'Horarios' => Icons.calendar_month,
     'Tareas' => Icons.assignment,
     'Asistencia' => Icons.check_circle_outline,
+    'Transporte' => Icons.directions_bus_outlined,
     'Grupos' => Icons.groups_outlined,
     'Cafetería' => Icons.restaurant,
     'Pedidos' => Icons.receipt_long,
@@ -363,6 +378,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () => _open('Horarios'),
                 ),
               ),
+            if (_isStudent)
+              Card(
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xffe5efff),
+                    child: Icon(Icons.directions_bus, color: Color(0xff2949b4)),
+                  ),
+                  title: const Text('Transporte universitario'),
+                  subtitle: const Text(
+                    'Consulta rutas y sigue una unidad simulada',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _open('Transporte'),
+                ),
+              ),
           ],
         ),
       ),
@@ -384,6 +414,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _moduleScreen(String title) {
+    if (title == 'Transporte') return const TransportScreen();
     if (title == 'Asistencia' && _roleSet.contains('DOCENTE')) {
       return TeacherAttendanceScreen(
         loadSessions: () => widget.loadAcademicModule(title),
