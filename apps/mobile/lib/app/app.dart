@@ -105,7 +105,12 @@ class _AppUaeState extends State<AppUae> {
       var session = await _sessionStore.read();
       var expired = session != null && !session.expiresAt.isAfter(_now);
       if (!expired && session != null && _api != null) {
-        expired = !await _api.isSessionValid(session.accessToken);
+        final roles = await _api.currentRoles(session.accessToken);
+        expired = roles == null;
+        if (roles != null) {
+          session = session.withRoles(roles);
+          await _sessionStore.write(session);
+        }
       }
       if (session != null && !session.expiresAt.isAfter(_now)) {
         expired = true;
@@ -209,7 +214,57 @@ class _AppUaeState extends State<AppUae> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'App Unificada UAE',
-      theme: ThemeData(colorSchemeSeed: Colors.blue, useMaterial3: true),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xff214b78),
+          brightness: Brightness.light,
+        ),
+        scaffoldBackgroundColor: const Color(0xfff4f7fb),
+        useMaterial3: true,
+        cardTheme: CardThemeData(
+          color: Colors.white,
+          elevation: 1,
+          shadowColor: const Color(0xff16365c).withValues(alpha: .08),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: const BorderSide(color: Color(0xffe9eef5)),
+          ),
+          margin: const EdgeInsets.symmetric(vertical: 6),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 17,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xffdce4ef)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xffdce4ef)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xff315d96), width: 1.6),
+          ),
+        ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: Colors.white,
+          indicatorColor: const Color(0xffe6efff),
+          elevation: 8,
+          labelTextStyle: WidgetStateProperty.resolveWith(
+            (states) => TextStyle(
+              fontSize: 11,
+              fontWeight: states.contains(WidgetState.selected)
+                  ? FontWeight.w700
+                  : FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
       home: _isRestoringSession
           ? const AppLoadingScreen(message: 'Recuperando sesión...')
           : _sessionRestoreFailed
@@ -230,8 +285,28 @@ class _AppUaeState extends State<AppUae> {
           : HomeScreen(
               onLogout: _logout,
               email: _session!.email,
+              roles: _session!.roles,
               loadCourseGrades: () =>
                   _api!.getCourseGrades(_session!.accessToken),
+              loadAcademicModule: (module) =>
+                  _api!.getAcademicModule(_session!.accessToken, module),
+              loadAttendanceRoster: (scheduleId, date) => _api!
+                  .getAttendanceRoster(_session!.accessToken, scheduleId, date),
+              saveAttendance: (scheduleId, studentId, date, status) =>
+                  _api!.recordAttendance(
+                    _session!.accessToken,
+                    scheduleId: scheduleId,
+                    studentId: studentId,
+                    date: date,
+                    status: status,
+                  ),
+              saveTaskProgress: (taskId, status, {content}) =>
+                  _api!.saveTaskProgress(
+                    _session!.accessToken,
+                    taskId: taskId,
+                    status: status,
+                    content: content,
+                  ),
             ),
       onUnknownRoute: (_) => MaterialPageRoute<void>(
         builder: (_) => AppErrorScreen(

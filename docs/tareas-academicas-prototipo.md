@@ -16,10 +16,15 @@
 - `database/tests/calificaciones_academicas_postgres.sql`: pruebas de
   calificaciones, disponibles después de aplicar el esquema y el seed de
   evaluación.
-- `services/api-java`: aquí deberá implementarse el acceso autenticado y los
-  endpoints. La API aún no está conectada a este modelo.
-- `apps/mobile/lib/features/academic`: aquí deberá integrarse la interfaz
-  móvil de tareas. La pantalla aún no está implementada.
+- `services/api-java/.../academic/AcademicReadController.java`: expone
+  `GET /api/v1/academic/tasks` y `POST /api/v1/academic/tasks/progress`;
+  valida la sesión/rol y deriva el ID del alumno del token. El POST solo permite
+  guardar estados permitidos en tareas del grupo del alumno.
+- `apps/mobile/lib/features/academic/presentation/tasks_screen.dart`: consume
+  esas rutas y presenta filtros por estado, prioridad, vencimiento, detalle,
+  avance y entrega de texto.
+- La app todavía no carga archivos y no existe una interfaz docente para
+  publicar tareas.
 
 ## Checklist y alcance
 
@@ -34,7 +39,11 @@
 | Estado vencida | Se calcula a partir de la fecha límite; no se guarda como estado permanente |
 | Mostrar tareas próximas | Vista SQL con ventana de siete días |
 | Crear notificación | Al crear una tarea, el trigger notifica a los estudiantes de su grupo |
-| API, pantalla móvil y avisos automáticos de vencimiento | Pendientes |
+| API autenticada de consulta del alumno | Implementada: `GET /api/v1/academic/tasks` |
+| Pantalla móvil de consulta | Implementada: filtros, detalle, carga, vacío, error y reintento |
+| Guardar avance y entregar texto desde la app | Implementado con sesión; adjuntar archivos sigue pendiente |
+| Publicar tareas desde la interfaz docente | Pendiente; la base ya valida materia, grupo y docente asignado |
+| Avisos automáticos antes del vencimiento y notificaciones push | Pendientes; el trigger solo crea un aviso al asignar una tarea |
 
 Una entrega tardía sigue apareciendo como `ENTREGADA`; la vista también expone
 `entrega_tardia`. Una tarea no entregada cuya fecha ya pasó aparece como

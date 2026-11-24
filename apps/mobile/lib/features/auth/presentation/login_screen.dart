@@ -135,128 +135,205 @@ class _LoginScreenState extends State<LoginScreen> {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: const Color(0xfff3f7fc),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: AutofillGroup(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Icon(Icons.school_outlined, size: 56),
-                      const SizedBox(height: 20),
-                      Text(
-                        'App Unificada UAE',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Inicia sesión con tu cuenta institucional',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 32),
-                      TextFormField(
-                        controller: _emailController,
-                        enabled: !_isLoading,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        autofillHints: const [AutofillHints.username],
-                        autocorrect: false,
-                        decoration: const InputDecoration(
-                          labelText: 'Correo institucional',
-                          hintText: 'nombre@institucion.edu',
-                          prefixIcon: Icon(Icons.email_outlined),
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: _validateEmail,
-                        onChanged: (_) => _clearError(),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _passwordController,
-                        enabled: !_isLoading,
-                        obscureText: _isPasswordObscured,
-                        textInputAction: TextInputAction.done,
-                        autofillHints: const [AutofillHints.password],
-                        decoration: InputDecoration(
-                          labelText: 'Contraseña',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          border: const OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            tooltip: _isPasswordObscured
-                                ? 'Mostrar contraseña'
-                                : 'Ocultar contraseña',
-                            onPressed: _isLoading
-                                ? null
-                                : () => setState(
-                                    () => _isPasswordObscured =
-                                        !_isPasswordObscured,
-                                  ),
-                            icon: Icon(
-                              _isPasswordObscured
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
+              constraints: const BoxConstraints(maxWidth: 450),
+              child: Card(
+                margin: EdgeInsets.zero,
+                elevation: 3,
+                shadowColor: const Color(0xff214b78).withValues(alpha: .09),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(26),
+                  side: const BorderSide(color: Color(0xffe8eef6)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(26, 20, 26, 20),
+                  child: AutofillGroup(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Center(
+                            child: Container(
+                              width: 54,
+                              height: 54,
+                              decoration: BoxDecoration(
+                                color: const Color(0xffedf3fc),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Icon(
+                                Icons.school_outlined,
+                                size: 31,
+                                color: Color(0xff214b78),
+                              ),
                             ),
                           ),
-                        ),
-                        validator: _validatePassword,
-                        onChanged: (_) => _clearError(),
-                        onFieldSubmitted: (_) => _submit(),
-                      ),
-                      if (_errorMessage != null) ...[
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: colors.errorContainer,
-                            borderRadius: BorderRadius.circular(8),
+                          const SizedBox(height: 10),
+                          Text(
+                            'UNIVERSIDAD ALBERT EINSTEIN',
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: const Color(0xff315d96),
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.1,
+                                ),
+                            textAlign: TextAlign.center,
                           ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                color: colors.onErrorContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _errorMessage!,
-                                  style: TextStyle(
-                                    color: colors.onErrorContainer,
-                                  ),
+                          const SizedBox(height: 5),
+                          Text(
+                            'App Unificada UAE',
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
+                                  color: const Color(0xff1e3553),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            'Tu espacio académico digital',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: const Color(0xff70819a)),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 18),
+                          Text(
+                            'Bienvenido de vuelta',
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
+                                  color: const Color(0xff1e3553),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Ingresa tus datos para continuar',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: const Color(0xff70819a)),
+                          ),
+                          const SizedBox(height: 15),
+                          TextFormField(
+                            controller: _emailController,
+                            enabled: !_isLoading,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            autofillHints: const [AutofillHints.username],
+                            autocorrect: false,
+                            decoration: const InputDecoration(
+                              labelText: 'Correo institucional',
+                              hintText: 'nombre@institucion.edu',
+                              prefixIcon: Icon(Icons.email_outlined),
+                            ),
+                            validator: _validateEmail,
+                            onChanged: (_) => _clearError(),
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _passwordController,
+                            enabled: !_isLoading,
+                            obscureText: _isPasswordObscured,
+                            textInputAction: TextInputAction.done,
+                            autofillHints: const [AutofillHints.password],
+                            decoration: InputDecoration(
+                              labelText: 'Contraseña',
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              suffixIcon: IconButton(
+                                tooltip: _isPasswordObscured
+                                    ? 'Mostrar contraseña'
+                                    : 'Ocultar contraseña',
+                                onPressed: _isLoading
+                                    ? null
+                                    : () => setState(
+                                        () => _isPasswordObscured =
+                                            !_isPasswordObscured,
+                                      ),
+                                icon: Icon(
+                                  _isPasswordObscured
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
                                 ),
                               ),
-                            ],
+                            ),
+                            validator: _validatePassword,
+                            onChanged: (_) => _clearError(),
+                            onFieldSubmitted: (_) => _submit(),
                           ),
-                        ),
-                      ],
-                      const SizedBox(height: 24),
-                      FilledButton(
-                        onPressed: _isLoading ? null : _submit,
-                        child: _isLoading
-                            ? const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                          if (_errorMessage != null) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: colors.errorContainer,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Row(
                                 children: [
-                                  SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
+                                  Icon(
+                                    Icons.error_outline,
+                                    color: colors.onErrorContainer,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _errorMessage!,
+                                      style: TextStyle(
+                                        color: colors.onErrorContainer,
+                                      ),
                                     ),
                                   ),
-                                  SizedBox(width: 12),
-                                  Text('Iniciando sesión...'),
                                 ],
-                              )
-                            : const Text('Iniciar sesión'),
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 18),
+                          FilledButton(
+                            onPressed: _isLoading ? null : _submit,
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size.fromHeight(54),
+                              backgroundColor: const Color(0xff214b78),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              textStyle: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                              ),
+                            ),
+                            child: _isLoading
+                                ? const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                      SizedBox(width: 12),
+                                      Text('Iniciando sesión...'),
+                                    ],
+                                  )
+                                : const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text('Iniciar sesión'),
+                                      SizedBox(width: 10),
+                                      Icon(
+                                        Icons.arrow_forward_rounded,
+                                        size: 19,
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),

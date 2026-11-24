@@ -69,6 +69,31 @@ void main() {
     );
   });
 
+  test('guarda el avance de tarea con la sesión del estudiante', () async {
+    final api = IdentityApi(
+      'http://127.0.0.1:8080',
+      client: MockClient((request) async {
+        expect(request.method, 'POST');
+        expect(request.url.path, '/api/v1/academic/tasks/progress');
+        expect(request.headers['Authorization'], 'Bearer token-ficticio');
+        expect(jsonDecode(request.body), {
+          'taskId': 27,
+          'status': 'EN_PROGRESO',
+          'content': 'Borrador',
+        });
+        return http.Response('', 204);
+      }),
+    );
+    addTearDown(api.close);
+
+    await api.saveTaskProgress(
+      'token-ficticio',
+      taskId: 27,
+      status: 'EN_PROGRESO',
+      content: 'Borrador',
+    );
+  });
+
   test('rechaza HTTP remoto y direcciones mal configuradas', () {
     expect(() => IdentityApi('http://api.ejemplo.edu'), throwsArgumentError);
     expect(

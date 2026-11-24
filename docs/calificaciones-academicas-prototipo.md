@@ -15,9 +15,12 @@
   vista de consulta, con aviso de estimación y sin controles para editar.
 - `apps/mobile/test/features/grades/course_grade_summary_test.dart`: pruebas
   de cálculo, escala, materias sin notas y pantalla de solo lectura.
-- `services/api-java`: faltan los endpoints académicos y su autorización
-  basada en la sesión validada. La API de identidad aún no conecta este
-  módulo.
+- `services/api-java/.../grades/GradesController.java`: `GET /api/v1/grades/courses`
+  valida el token, exige el rol de estudiante y solo
+  entrega sus materias.
+- `apps/mobile/lib/features/auth/data/identity_api.dart` y
+  `apps/mobile/lib/features/home/presentation/home_screen.dart`: conectan la
+  consulta a la API y abren la vista desde el inicio.
 
 ## Checklist y decisiones para este prototipo
 
@@ -26,12 +29,12 @@
 | Definir escala evaluativa | Escala de 0 a 100; falta confirmación oficial de la universidad |
 | Definir porcentaje de cada entregable | Datos demo: Parcial 1 = 30%, Proyecto integrador = 30%, Evaluación final = 40% |
 | Registrar calificaciones | Modelo SQL acepta notas de docente asignado; falta el endpoint autenticado de captura |
-| Calcular promedio estimado | Vista SQL y modelo Dart; pondera solo entregables con nota y normaliza por su peso calificado |
-| Mostrar progreso del curso | Suma los porcentajes de entregables que ya tienen calificación |
+| Calcular promedio estimado | Vista SQL, API autenticada y modelo Dart; pondera solo entregables con nota y normaliza por su peso calificado |
+| Mostrar progreso del curso | Vista SQL y móvil muestran la ponderación que ya tiene calificación |
 | Indicar que es una estimación | Aviso permanente en la pantalla; el promedio se etiqueta como estimado |
-| No permitir que el alumno cambie calificaciones | Pantalla móvil de consulta no tiene edición; falta asegurar la API al conectarla |
-| Permitir al docente actualizar su grupo | La base restringe el plan a docentes asignados; falta verificar identidad en API y crear la interfaz de captura |
-| Probar materias sin calificaciones | Pruebas SQL para Turismo/ITI y prueba Flutter: promedio vacío y progreso 0% |
+| No permitir que el alumno cambie calificaciones | Pantalla y endpoint móvil son de solo lectura; la API no expone escritura al alumno |
+| Permitir al docente actualizar su grupo | La base valida asignación; faltan endpoint autenticado y pantalla de captura |
+| Probar materias sin calificaciones | Pruebas SQL para Turismo/ITI y Flutter para promedio vacío y progreso 0% |
 
 El 30/30/40 es un ejemplo, no un porcentaje institucional. La base permite
 distribuciones alternativas siempre que no excedan 100%; la estimación solo se
@@ -57,11 +60,10 @@ verificar que el usuario autenticado tenga rol `DOCENTE` y que su cuenta esté
 vinculada al docente asignado a esa materia y grupo; no debe confiar en IDs de
 usuario o docente enviados por Flutter.
 
-La pantalla incluida es una vista aislada lista para recibir sus datos, pero
-todavía no está conectada a la navegación principal ni a una API: el inicio de
-sesión actual aún no proporciona rol, perfil ni endpoints académicos. El
-docente todavía no tiene pantalla de captura; el botón oculto no sería un
-control de seguridad suficiente.
+La pantalla de consulta ya está conectada al inicio y a la API. El endpoint
+`GET /api/v1/grades/courses` valida sesión y rol; la captura/corrección de notas
+por docentes todavía no está disponible. La API debe mantener cualquier
+escritura restringida al docente asignado, aunque se agregue la interfaz.
 
 ## Cómo aplicar y probar en PostgreSQL de desarrollo
 

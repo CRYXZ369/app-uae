@@ -1,12 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/session/session_store.dart';
-<<<<<<< HEAD
 import '../../cafeteria/presentation/cafeteria_screen.dart';
-=======
 import '../../grades/domain/course_grade_summary.dart';
 import '../../grades/presentation/course_grades_screen.dart';
->>>>>>> 1860fda05eff8464ce2831b07db3a4043f014bb2
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -53,75 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-<<<<<<< HEAD
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('App Unificada UAE'),
-        actions: [
-          TextButton.icon(
-            onPressed: _isLoggingOut ? null : _logout,
-            icon: _isLoggingOut
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.logout),
-            label: Text(_isLoggingOut ? 'Cerrando...' : 'Cerrar sesión'),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'App Unificada UAE',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'La aplicación está en desarrollo.',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CafeteriaScreen(
-                          userRole: 'ESTUDIANTE',
-                        ),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.restaurant_menu),
-                  label: const Text('Pedidos de Cafetería'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  ),
-                ),
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    _errorMessage!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ],
-            ),
-          ),
-=======
   void _open(String title) {
     if (title == 'Calificaciones') {
       Navigator.of(context).push(
@@ -132,13 +60,20 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       return;
     }
+    if (title == 'Cafetería') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => const CafeteriaScreen(userRole: 'ESTUDIANTE'),
+        ),
+      );
+      return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => _ModulePage(
           title: title,
           icon: _iconFor(title),
           message: 'Este módulo está contemplado para la aplicación. Su contenido estará disponible próximamente.',
->>>>>>> 1860fda05eff8464ce2831b07db3a4043f014bb2
         ),
       ),
     );
@@ -149,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'Horarios' => Icons.calendar_month,
     'Tareas' => Icons.assignment,
     'Asistencia' => Icons.check_circle_outline,
+    'Cafetería' => Icons.restaurant_menu,
     'Notificaciones' => Icons.notifications_none,
     _ => Icons.person_outline,
   };
@@ -311,6 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ('Horarios', Icons.calendar_month),
                   ('Tareas', Icons.assignment),
                   ('Asistencia', Icons.check_circle_outline),
+                  ('Cafetería', Icons.restaurant_menu),
                 ])
                   Expanded(
                     child: _Shortcut(

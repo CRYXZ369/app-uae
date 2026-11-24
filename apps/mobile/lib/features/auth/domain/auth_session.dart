@@ -4,12 +4,22 @@ class AuthSession {
     required this.email,
     required this.expiresAt,
     this.refreshToken,
+    this.roles = const [],
   });
 
   final String accessToken;
   final String? refreshToken;
   final String email;
   final DateTime expiresAt;
+  final List<String> roles;
+
+  AuthSession withRoles(List<String> value) => AuthSession(
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+    email: email,
+    expiresAt: expiresAt,
+    roles: List.unmodifiable(value),
+  );
 
   bool get isExpired => !expiresAt.isAfter(DateTime.now());
 
@@ -18,6 +28,7 @@ class AuthSession {
     'refreshToken': refreshToken,
     'email': email,
     'expiresAt': expiresAt.toUtc().toIso8601String(),
+    'roles': roles,
   };
 
   factory AuthSession.fromJson(Map<String, Object?> json) {
@@ -25,10 +36,12 @@ class AuthSession {
     final refreshToken = json['refreshToken'];
     final email = json['email'];
     final expiresAtValue = json['expiresAt'];
+    final rolesValue = json['roles'];
 
     if (accessToken is! String ||
         accessToken.isEmpty ||
         (refreshToken != null && refreshToken is! String) ||
+        (rolesValue != null && rolesValue is! List) ||
         email is! String ||
         expiresAtValue is! String) {
       throw const FormatException('Invalid stored authentication session.');
@@ -44,6 +57,9 @@ class AuthSession {
       refreshToken: refreshToken == null ? null : refreshToken as String,
       email: email,
       expiresAt: expiresAt,
+      roles: rolesValue == null
+          ? const []
+          : (rolesValue as List).whereType<String>().toList(growable: false),
     );
   }
 }
