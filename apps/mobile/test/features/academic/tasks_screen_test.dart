@@ -60,4 +60,30 @@ void main() {
 
     expect(find.text('Aún no tienes tareas'), findsOneWidget);
   });
+
+  testWidgets('permite guardar una entrega de texto', (tester) async {
+    String? savedStatus;
+    String? savedContent;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TasksScreen(
+          loadTasks: () async => [rows.first],
+          saveProgress: (taskId, status, {content}) async {
+            expect(taskId, 1);
+            savedStatus = status;
+            savedContent = content;
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Práctica de laboratorio'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Mi respuesta final');
+    await tester.tap(find.text('Entregar tarea'));
+    await tester.pumpAndSettle();
+
+    expect(savedStatus, 'ENTREGADA');
+    expect(savedContent, 'Mi respuesta final');
+  });
 }

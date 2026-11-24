@@ -17,12 +17,14 @@
   calificaciones, disponibles después de aplicar el esquema y el seed de
   evaluación.
 - `services/api-java/.../academic/AcademicReadController.java`: expone
-  `GET /api/v1/academic/tasks`; valida la sesión y el rol de estudiante y
-  obtiene el ID del alumno desde el token.
+  `GET /api/v1/academic/tasks` y `POST /api/v1/academic/tasks/progress`;
+  valida la sesión/rol y deriva el ID del alumno del token. El POST solo permite
+  guardar estados permitidos en tareas del grupo del alumno.
 - `apps/mobile/lib/features/academic/presentation/tasks_screen.dart`: consume
-  esa consulta y presenta filtros por estado, prioridad, vencimiento y detalle.
-- La API todavía no permite que el estudiante actualice el estado ni entregue
-  archivos; tampoco existe una interfaz docente para publicar tareas.
+  esas rutas y presenta filtros por estado, prioridad, vencimiento, detalle,
+  avance y entrega de texto.
+- La app todavía no carga archivos y no existe una interfaz docente para
+  publicar tareas.
 
 ## Checklist y alcance
 
@@ -39,7 +41,8 @@
 | Crear notificación | Al crear una tarea, el trigger notifica a los estudiantes de su grupo |
 | API autenticada de consulta del alumno | Implementada: `GET /api/v1/academic/tasks` |
 | Pantalla móvil de consulta | Implementada: filtros, detalle, carga, vacío, error y reintento |
-| Cambio de estado y entrega desde la app | Pendiente; no se deben mostrar controles que aparenten guardar |
+| Guardar avance y entregar texto desde la app | Implementado con sesión; adjuntar archivos sigue pendiente |
+| Publicar tareas desde la interfaz docente | Pendiente; la base ya valida materia, grupo y docente asignado |
 | Avisos automáticos antes del vencimiento y notificaciones push | Pendientes; el trigger solo crea un aviso al asignar una tarea |
 
 Una entrega tardía sigue apareciendo como `ENTREGADA`; la vista también expone

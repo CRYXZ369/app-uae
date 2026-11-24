@@ -26,6 +26,7 @@ public class AcademicReadController {
     public AcademicReadController(JdbcTemplate db) { this.db = db; }
 
     record AttendanceMark(Long idHorario, Long idEstudiante, LocalDate fecha, String estado) {}
+    record TaskProgress(Long taskId, String status, String content) {}
 
     @GetMapping("/profile")
     public ResponseEntity<?> profile(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth)
@@ -87,11 +88,49 @@ public class AcademicReadController {
         if (id == null) return error(HttpStatus.UNAUTHORIZED, "INVALID_SESSION");
         if (id < 0) return error(HttpStatus.FORBIDDEN, "STUDENT_ROLE_REQUIRED");
         return ResponseEntity.ok(db.queryForList("""
-            SELECT id_tarea, titulo, descripcion, materia, docente, fecha_entrega,
-                   prioridad, estado, entrega_tardia
-            FROM vista_tareas_estudiante WHERE id_usuario=?
-            ORDER BY fecha_entrega, titulo
+            SELECT v.id_tarea, v.titulo, v.descripcion, v.materia, v.docente,
+                   v.fecha_entrega, v.prioridad, v.estado, v.entrega_tardia,
+                   e.contenido_entrega
+            FROM vista_tareas_estudiante v
+            LEFT JOIN entregas_tareas e
+              ON e.id_tarea=v.id_tarea AND e.id_usuario=v.id_usuario
+            WHERE v.id_usuario=?
+            ORDER BY v.fecha_entrega, v.titulo
             """, id));
+    }
+
+    @PostMapping("/tasks/progress")
+    public ResponseEntity<?> updateTaskProgress(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth,
+            @RequestBody(required = false) TaskProgress progress) throws GeneralSecurityException {
+        Long id = studentId(auth);
+        if (id == null) return error(HttpStatus.UNAUTHORIZED, "INVALID_SESSION");
+        if (id < 0) return error(HttpStatus.FORBIDDEN, "STUDENT_ROLE_REQUIRED");
+        if (progress == null || progress.taskId() == null || progress.taskId() <= 0 ||
+            progress.status() == null ||
+            !List.of("PENDIENTE", "EN_PROGRESO", "ENTREGADA").contains(progress.status()) ||
+            (progress.content() != null && progress.content().length() > 20000) ||
+            ("ENTREGADA".equals(progress.status()) &&
+                (progress.content() == null || progress.content().isBlank()))) {
+            return error(HttpStatus.BAD_REQUEST, "INVALID_TASK_PROGRESS");
+        }
+        int updated = db.update("""
+            INSERT INTO entregas_tareas(
+              id_tarea,id_grupo,id_usuario,estado,contenido_entrega,fecha_entregada
+            )
+            SELECT t.id_tarea,t.id_grupo,u.id_usuario,?,?,
+                   CASE WHEN ?='ENTREGADA' THEN now() ELSE NULL END
+            FROM tareas_academicas t
+            JOIN usuarios u ON u.id_grupo=t.id_grupo AND u.id_usuario=?
+            WHERE t.id_tarea=? AND u.activo=true
+            ON CONFLICT (id_tarea,id_usuario) DO UPDATE
+              SET estado=EXCLUDED.estado,
+                  contenido_entrega=EXCLUDED.contenido_entrega,
+                  fecha_entregada=EXCLUDED.fecha_entregada,
+                  actualizada_en=now()
+            """, progress.status(), progress.content(), progress.status(), id, progress.taskId());
+        if (updated == 0) return error(HttpStatus.NOT_FOUND, "TASK_NOT_FOUND");
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/attendance")

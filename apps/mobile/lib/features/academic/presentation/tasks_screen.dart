@@ -1,11 +1,17 @@
 import 'package:material_ui/material_ui.dart';
 
 typedef TaskLoader = Future<List<Map<String, dynamic>>> Function();
+typedef TaskProgressSaver = Future<void> Function(
+  int taskId,
+  String status, {
+  String? content,
+});
 
 class TasksScreen extends StatefulWidget {
-  const TasksScreen({required this.loadTasks, super.key});
+  const TasksScreen({required this.loadTasks, this.saveProgress, super.key});
 
   final TaskLoader loadTasks;
+  final TaskProgressSaver? saveProgress;
 
   @override
   State<TasksScreen> createState() => _TasksScreenState();
@@ -179,60 +185,213 @@ class _TasksScreenState extends State<TasksScreen> {
     _TaskFilter.completed => 'Entregadas',
   };
 
-  void _showDetails(Map<String, dynamic> task) {
-    final title = _text(task, 'titulo');
-    final description = _text(task, 'descripcion');
-    final subject = _text(task, 'materia');
-    final teacher = _text(task, 'docente');
-    showModalBottomSheet<void>(
+  Future<void> _showDetails(Map<String, dynamic> task) async {
+    final taskId = int.tryParse(_text(task, 'id_tarea'));
+    final status = _text(task, 'estado').toUpperCase();
+    final canUpdate =
+        widget.saveProgress != null && taskId != null && status != 'ENTREGADA';
+    final change = await showModalBottomSheet<_TaskProgressChange>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(22, 8, 22, 28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title.isEmpty ? 'Detalle de tarea' : title,
-                style: Theme.of(context).textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.w700),
+      builder: (_) => _TaskDetailsSheet(task: task, canUpdate: canUpdate),
+    );
+    if (change == null || taskId == null || widget.saveProgress == null) return;
+
+    try {
+      await widget.saveProgress!(
+        taskId,
+        change.status,
+        content: change.content,
+      );
+      if (!mounted) return;
+      setState(() => _tasks = widget.loadTasks());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            change.status == 'ENTREGADA'
+                ? 'Tarea entregada.'
+                : 'Avance guardado.',
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se pudo guardar el avance. Inténtalo de nuevo.'),
+        ),
+      );
+    }
+  }
+}
+
+class _TaskProgressChange {
+  const _TaskProgressChange(this.status, this.content);
+  final String status;
+  final String content;
+}
+
+class _TaskDetailsSheet extends StatefulWidget {
+  const _TaskDetailsSheet({required this.task, required this.canUpdate});
+  final Map<String, dynamic> task;
+  final bool canUpdate;
+
+  @override
+  State<_TaskDetailsSheet> createState() => _TaskDetailsSheetState();
+}
+
+class _TaskDetailsSheetState extends State<_TaskDetailsSheet> {
+  late final TextEditingController _contentController;
+  String? _validationMessage;
+
+  String _text(String key) => widget.task[key]?.toString().trim() ?? '';
+
+  @override
+  void initState() {
+    super.initState();
+    _contentController = TextEditingController(
+      text: _text('contenido_entrega'),
+    );
+  }
+
+  @override
+  void dispose() {
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final title = _text('titulo');
+    final description = _text('descripcion');
+    final subject = _text('materia');
+    final teacher = _text('docente');
+    final status = _text('estado').toUpperCase();
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          22,
+          8,
+          22,
+          24 + MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title.isEmpty ? 'Detalle de tarea' : title,
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 12),
+            _DetailLine(
+              icon: Icons.menu_book_outlined,
+              text: subject.isEmpty ? 'Materia por confirmar' : subject,
+            ),
+            if (teacher.isNotEmpty)
+              _DetailLine(icon: Icons.person_outline, text: teacher),
+            _DetailLine(
+              icon: Icons.event_outlined,
+              text: _formatDate(DateTime.tryParse(_text('fecha_entrega'))),
+            ),
+            _DetailLine(
+              icon: Icons.flag_outlined,
+              text: 'Prioridad ${_text('prioridad').toLowerCase()}',
+            ),
+            _DetailLine(
+              icon: Icons.pending_actions_outlined,
+              text: _statusLabel(status),
+            ),
+            const Divider(height: 26),
+            Text(
+              description.isEmpty
+                  ? 'El docente no agregó una descripción.'
+                  : description,
+              style: const TextStyle(height: 1.45),
+            ),
+            if (widget.canUpdate) ...[
+              const SizedBox(height: 18),
+              TextField(
+                controller: _contentController,
+                minLines: 2,
+                maxLines: 5,
+                maxLength: 20000,
+                decoration: const InputDecoration(
+                  labelText: 'Tu respuesta o enlace de entrega',
+                  hintText: 'Escribe aquí tu entrega en texto',
+                  alignLabelWithHint: true,
+                ),
               ),
-              const SizedBox(height: 12),
-              _DetailLine(
-                icon: Icons.menu_book_outlined,
-                text: subject.isEmpty ? 'Materia por confirmar' : subject,
-              ),
-              if (teacher.isNotEmpty)
-                _DetailLine(icon: Icons.person_outline, text: teacher),
-              _DetailLine(
-                icon: Icons.event_outlined,
-                text: _formatDate(_date(task)),
-              ),
-              _DetailLine(
-                icon: Icons.flag_outlined,
-                text: 'Prioridad ${_text(task, 'prioridad').toLowerCase()}',
-              ),
-              _DetailLine(
-                icon: Icons.pending_actions_outlined,
-                text: _statusLabel(_text(task, 'estado').toUpperCase()),
-              ),
-              const Divider(height: 26),
-              Text(
-                description.isEmpty
-                    ? 'El docente no agregó una descripción.'
-                    : description,
-                style: const TextStyle(height: 1.45),
-              ),
-              const SizedBox(height: 14),
+              if (_validationMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    _validationMessage!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
               const Text(
-                'La actualización del estado aún no está habilitada en la app.',
+                'Esta versión guarda texto; todavía no admite archivos adjuntos.',
                 style: TextStyle(fontSize: 12, color: Color(0xff76859a)),
               ),
-            ],
-          ),
+              const SizedBox(height: 14),
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.of(context).pop(
+                      _TaskProgressChange(
+                        'EN_PROGRESO',
+                        _contentController.text.trim(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.save_outlined),
+                    label: const Text('Guardar avance'),
+                  ),
+                  FilledButton.icon(
+                    onPressed: () {
+                      if (_contentController.text.trim().isEmpty) {
+                        setState(
+                          () => _validationMessage = 'Escribe tu entrega antes de marcarla como entregada.',
+                        );
+                        return;
+                      }
+                      Navigator.of(context).pop(
+                        _TaskProgressChange(
+                          'ENTREGADA',
+                          _contentController.text.trim(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.task_alt),
+                    label: const Text('Entregar tarea'),
+                  ),
+                ],
+              ),
+            ] else if (status == 'ENTREGADA' &&
+                _text('contenido_entrega').isNotEmpty) ...[
+              const SizedBox(height: 18),
+              const Text(
+                'Tu entrega',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 6),
+              SelectableText(_text('contenido_entrega')),
+            ] else
+              const Padding(
+                padding: EdgeInsets.only(top: 14),
+                child: Text(
+                  'La entrega de archivos todavía no está disponible en esta versión.',
+                  style: TextStyle(fontSize: 12, color: Color(0xff76859a)),
+                ),
+              ),
+          ],
         ),
       ),
     );

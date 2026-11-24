@@ -17,6 +17,7 @@ class HomeScreen extends StatefulWidget {
     required this.loadAcademicModule,
     required this.loadAttendanceRoster,
     required this.saveAttendance,
+    required this.saveTaskProgress,
     super.key,
   });
 
@@ -28,6 +29,7 @@ class HomeScreen extends StatefulWidget {
   loadAcademicModule;
   final AttendanceRosterLoader loadAttendanceRoster;
   final AttendanceSaver saveAttendance;
+  final TaskProgressSaver saveTaskProgress;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -176,8 +178,10 @@ class _HomeScreenState extends State<HomeScreen> {
     if (title == 'Tareas' && _isStudent) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) =>
-              TasksScreen(loadTasks: () => widget.loadAcademicModule('Tareas')),
+          builder: (_) => TasksScreen(
+            loadTasks: () => widget.loadAcademicModule('Tareas'),
+            saveProgress: widget.saveTaskProgress,
+          ),
         ),
       );
       return;

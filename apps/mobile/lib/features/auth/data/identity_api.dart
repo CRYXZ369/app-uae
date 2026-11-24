@@ -200,6 +200,36 @@ class IdentityApi {
     }
   }
 
+  Future<void> saveTaskProgress(
+    String token, {
+    required int taskId,
+    required String status,
+    String? content,
+  }) async {
+    try {
+      final request =
+          http.Request(
+              'POST',
+              _baseUri.resolve('/api/v1/academic/tasks/progress'),
+            )
+            ..headers['Authorization'] = 'Bearer $token'
+            ..headers['Content-Type'] = 'application/json'
+            ..body = jsonEncode({
+              'taskId': taskId,
+              'status': status,
+              'content': content,
+            });
+      final streamed = await _client.send(request).timeout(_timeout);
+      final response = await http.Response.fromStream(streamed)
+          .timeout(_timeout);
+      if (response.statusCode != 204) throw const IdentityApiException();
+    } on http.ClientException {
+      throw const IdentityApiException();
+    } on TimeoutException {
+      throw const IdentityApiException();
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getAttendanceRoster(
     String token,
     int scheduleId,

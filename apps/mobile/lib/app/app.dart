@@ -300,6 +300,13 @@ class _AppUaeState extends State<AppUae> {
                     date: date,
                     status: status,
                   ),
+              saveTaskProgress: (taskId, status, {content}) =>
+                  _api!.saveTaskProgress(
+                    _session!.accessToken,
+                    taskId: taskId,
+                    status: status,
+                    content: content,
+                  ),
             ),
       onUnknownRoute: (_) => MaterialPageRoute<void>(
         builder: (_) => AppErrorScreen(
