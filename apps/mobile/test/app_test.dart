@@ -18,6 +18,7 @@ final _testSession = AuthSession(
   refreshToken: 'refresh-token',
   email: 'alumno@uae.edu.mx',
   expiresAt: DateTime.utc(2099),
+  roles: ['ESTUDIANTE'],
 );
 
 void main() {
@@ -178,7 +179,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(sessionStore.session?.accessToken, _testSession.accessToken);
-    expect(find.text('La aplicación está en desarrollo.'), findsOneWidget);
+    expect(find.text('¡Hola, Alumno!'), findsOneWidget);
     await tester.tap(find.text('Cerrar sesión'));
     await tester.pumpAndSettle();
 
@@ -242,8 +243,25 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('La aplicación está en desarrollo.'), findsOneWidget);
+    expect(find.text('¡Hola, Alumno!'), findsOneWidget);
     expect(find.text('Cerrar sesión'), findsOneWidget);
+  });
+
+  testWidgets('adapta accesos al rol de cafetería', (tester) async {
+    final cafeteriaSession = AuthSession(
+      accessToken: 'cafeteria-token',
+      email: 'lucia.pineda.prueba@uae.edu.mx',
+      expiresAt: DateTime.utc(2099),
+      roles: const ['CAFETERIA'],
+    );
+    await tester.pumpWidget(
+      AppUae(sessionStore: FakeSessionStore(cafeteriaSession)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cafetería'), findsWidgets);
+    expect(find.text('Pedidos'), findsWidgets);
+    expect(find.text('Calificaciones'), findsNothing);
   });
 
   testWidgets('elimina y no restaura una sesión expirada', (tester) async {

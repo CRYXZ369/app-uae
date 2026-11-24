@@ -105,7 +105,12 @@ class _AppUaeState extends State<AppUae> {
       var session = await _sessionStore.read();
       var expired = session != null && !session.expiresAt.isAfter(_now);
       if (!expired && session != null && _api != null) {
-        expired = !await _api.isSessionValid(session.accessToken);
+        final roles = await _api.currentRoles(session.accessToken);
+        expired = roles == null;
+        if (roles != null) {
+          session = session.withRoles(roles);
+          await _sessionStore.write(session);
+        }
       }
       if (session != null && !session.expiresAt.isAfter(_now)) {
         expired = true;
@@ -230,10 +235,21 @@ class _AppUaeState extends State<AppUae> {
           : HomeScreen(
               onLogout: _logout,
               email: _session!.email,
+              roles: _session!.roles,
               loadCourseGrades: () =>
                   _api!.getCourseGrades(_session!.accessToken),
               loadAcademicModule: (module) =>
                   _api!.getAcademicModule(_session!.accessToken, module),
+              loadAttendanceRoster: (scheduleId, date) => _api!
+                  .getAttendanceRoster(_session!.accessToken, scheduleId, date),
+              saveAttendance: (scheduleId, studentId, date, status) =>
+                  _api!.recordAttendance(
+                    _session!.accessToken,
+                    scheduleId: scheduleId,
+                    studentId: studentId,
+                    date: date,
+                    status: status,
+                  ),
             ),
       onUnknownRoute: (_) => MaterialPageRoute<void>(
         builder: (_) => AppErrorScreen(

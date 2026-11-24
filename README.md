@@ -62,6 +62,8 @@ Supabase utiliza PostgreSQL. Para una instalación nueva o para completar el esq
 7. `database/07_ddl_calificaciones_academicas_postgres.sql`
 8. `database/08_dml_calificaciones_demo_postgres.sql`
 9. `database/09_ddl_sesiones_identidad_postgres.sql`
+10. `database/10_ddl_asistencia_academica_postgres.sql`
+11. `database/11_dml_asistencia_demo_postgres.sql`
 
 Las migraciones son acumulativas; no edites las ya aplicadas. `02`, `04`, `08` y `09` son repetibles. Usa una base de desarrollo y conserva un respaldo antes de aplicarlas. Si `database/07_ddl_sesiones_identidad_postgres.sql` ya se aplicó en una base, no vuelvas a ejecutarla; `09` es su versión idempotente con numeración consolidada.
 

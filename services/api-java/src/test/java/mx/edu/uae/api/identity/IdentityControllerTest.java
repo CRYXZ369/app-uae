@@ -49,7 +49,11 @@ class IdentityControllerTest {
         JdbcTemplate db = mock(JdbcTemplate.class);
         when(db.query(anyString(), any(org.springframework.jdbc.core.RowMapper.class), any(Object.class)))
             .thenReturn(List.of());
-        IdentityController controller = new IdentityController(db, new PasswordVerifier(), new LoginRateLimiter());
+        IdentitySchema schema = mock(IdentitySchema.class);
+        when(schema.emailColumn()).thenReturn("correo_institucional");
+        when(schema.userActiveFilter()).thenReturn("");
+        IdentityController controller = new IdentityController(
+            db, new PasswordVerifier(), new LoginRateLimiter(), schema);
         var result = controller.login(new IdentityController.LoginRequest("ausente@uae.edu.mx", "prueba"),
             new MockHttpServletRequest());
         assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());

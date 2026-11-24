@@ -93,6 +93,31 @@ class IdentityApi {
     }
   }
 
+  Future<List<String>?> currentRoles(String token) async {
+    try {
+      final response = await _send(
+        'GET',
+        '/current',
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 401) return null;
+      if (response.statusCode != 200) throw const IdentityApiException();
+      final value = jsonDecode(response.body);
+      if (value is! Map<String, dynamic> || value['roles'] is! List) {
+        throw const IdentityApiException();
+      }
+      return (value['roles'] as List).whereType<String>().toList(
+        growable: false,
+      );
+    } on http.ClientException {
+      throw const IdentityApiException();
+    } on TimeoutException {
+      throw const IdentityApiException();
+    } on FormatException {
+      throw const IdentityApiException();
+    }
+  }
+
   Future<void> revoke(String token) async {
     try {
       final response = await _send(
@@ -146,6 +171,7 @@ class IdentityApi {
       'Materias': 'subjects',
       'Horarios': 'schedule',
       'Tareas': 'tasks',
+      'Asistencia': 'attendance',
       'Notificaciones': 'notifications',
       'Perfil': 'profile',
     };
@@ -170,6 +196,73 @@ class IdentityApi {
     } on TimeoutException {
       throw const IdentityApiException();
     } on FormatException {
+      throw const IdentityApiException();
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getAttendanceRoster(
+    String token,
+    int scheduleId,
+    DateTime date,
+  ) async {
+    try {
+      final day =
+          '${date.year.toString().padLeft(4, '0')}-'
+          '${date.month.toString().padLeft(2, '0')}-'
+          '${date.day.toString().padLeft(2, '0')}';
+      final uri = _baseUri
+          .resolve('/api/v1/academic/attendance/roster')
+          .replace(queryParameters: {'scheduleId': '$scheduleId', 'date': day});
+      final request = http.Request('GET', uri)
+        ..headers['Authorization'] = 'Bearer $token';
+      final streamed = await _client.send(request).timeout(_timeout);
+      final response = await http.Response.fromStream(streamed)
+          .timeout(_timeout);
+      if (response.statusCode != 200) throw const IdentityApiException();
+      final value = jsonDecode(response.body);
+      if (value is! List) throw const IdentityApiException();
+      return value
+          .map((row) => Map<String, dynamic>.from(row as Map))
+          .toList(growable: false);
+    } on http.ClientException {
+      throw const IdentityApiException();
+    } on TimeoutException {
+      throw const IdentityApiException();
+    } on FormatException {
+      throw const IdentityApiException();
+    }
+  }
+
+  Future<void> recordAttendance(
+    String token, {
+    required int scheduleId,
+    required int studentId,
+    required DateTime date,
+    required String status,
+  }) async {
+    try {
+      final request =
+          http.Request('POST', _baseUri.resolve('/api/v1/academic/attendance'))
+            ..headers.addAll({
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            })
+            ..body = jsonEncode({
+              'idHorario': scheduleId,
+              'idEstudiante': studentId,
+              'fecha':
+                  '${date.year.toString().padLeft(4, '0')}-'
+                  '${date.month.toString().padLeft(2, '0')}-'
+                  '${date.day.toString().padLeft(2, '0')}',
+              'estado': status,
+            });
+      final streamed = await _client.send(request).timeout(_timeout);
+      final response = await http.Response.fromStream(streamed)
+          .timeout(_timeout);
+      if (response.statusCode != 204) throw const IdentityApiException();
+    } on http.ClientException {
+      throw const IdentityApiException();
+    } on TimeoutException {
       throw const IdentityApiException();
     }
   }

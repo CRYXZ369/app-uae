@@ -94,6 +94,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: CourseGradesScreen(courses: [summary])),
     );
+    await tester.pumpAndSettle();
 
     expect(
       find.text(

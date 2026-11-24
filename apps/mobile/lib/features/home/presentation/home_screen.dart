@@ -4,21 +4,28 @@ import '../../../core/session/session_store.dart';
 import '../../grades/domain/course_grade_summary.dart';
 import '../../grades/presentation/course_grades_screen.dart';
 import '../../academic/presentation/academic_module_screen.dart';
+import '../../academic/presentation/teacher_attendance_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
     required this.onLogout,
     required this.email,
+    required this.roles,
     required this.loadCourseGrades,
     required this.loadAcademicModule,
+    required this.loadAttendanceRoster,
+    required this.saveAttendance,
     super.key,
   });
 
   final Future<void> Function() onLogout;
   final String email;
+  final List<String> roles;
   final Future<List<CourseGradeSummary>> Function() loadCourseGrades;
   final Future<List<Map<String, dynamic>>> Function(String module)
   loadAcademicModule;
+  final AttendanceRosterLoader loadAttendanceRoster;
+  final AttendanceSaver saveAttendance;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -28,6 +35,89 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoggingOut = false;
   String? _errorMessage;
   int _tab = 0;
+
+  Set<String> get _roleSet =>
+      widget.roles.map((role) => role.toUpperCase()).toSet();
+  bool get _isStudent => _roleSet.contains('ESTUDIANTE');
+  String get _roleTitle {
+    const names = {
+      'ESTUDIANTE': 'Estudiante',
+      'DOCENTE': 'Docente',
+      'CAFETERIA': 'Cafetería',
+      'CCE': 'Consejo Cultural Estudiantil',
+      'ADMIN_ESCOLAR': 'Administración escolar',
+      'GESTION_ACADEMICA': 'Gestión académica',
+      'RECTORIA': 'Rectoría',
+      'SOPORTE_TECNICO': 'Soporte técnico',
+      'TRABAJADOR': 'Personal universitario',
+      'DIRECTIVO': 'Directivo',
+    };
+    for (final role in widget.roles) {
+      if (names.containsKey(role)) return names[role]!;
+    }
+    return 'Usuario UAE';
+  }
+
+  List<String> get _modules {
+    final modules = <String>[];
+    void add(List<String> values) {
+      for (final value in values) {
+        if (!modules.contains(value)) modules.add(value);
+      }
+    }
+
+    if (_isStudent) {
+      add(['Materias', 'Calificaciones', 'Horarios', 'Tareas', 'Asistencia']);
+    }
+    if (_roleSet.contains('DOCENTE')) {
+      add(['Horarios', 'Materias', 'Tareas', 'Asistencia']);
+    }
+    if (_roleSet.contains('CAFETERIA')) {
+      add(['Cafetería', 'Pedidos']);
+    }
+    if (_roleSet.contains('CCE')) {
+      add(['Votaciones', 'Notificaciones']);
+    }
+    if (_roleSet.contains('ADMIN_ESCOLAR')) {
+      add(['Pagos', 'Constancias', 'Perfil']);
+    }
+    if (_roleSet.contains('GESTION_ACADEMICA')) {
+      add(['Materias', 'Horarios', 'Grupos']);
+    }
+    if (_roleSet.contains('RECTORIA') || _roleSet.contains('DIRECTIVO')) {
+      add(['Avisos', 'Indicadores']);
+    }
+    if (_roleSet.contains('SOPORTE_TECNICO')) {
+      add(['Usuarios', 'Roles', 'Incidencias']);
+    }
+    if (_roleSet.contains('TRABAJADOR')) {
+      add(['Avisos']);
+    }
+    if (_roleSet.isEmpty) {
+      add(['Materias', 'Calificaciones', 'Horarios', 'Tareas']);
+    }
+    if (!modules.contains('Notificaciones')) {
+      add(['Notificaciones']);
+    }
+    if (!modules.contains('Perfil')) {
+      add(['Perfil']);
+    }
+    return modules;
+  }
+
+  List<String> get _navigationModules {
+    if (_isStudent) return ['Materias', 'Notificaciones', 'Perfil'];
+    if (_roleSet.contains('DOCENTE')) {
+      return ['Horarios', 'Asistencia', 'Perfil'];
+    }
+    if (_roleSet.contains('CAFETERIA')) {
+      return ['Cafetería', 'Pedidos', 'Perfil'];
+    }
+    if (_roleSet.contains('CCE')) {
+      return ['Votaciones', 'Notificaciones', 'Perfil'];
+    }
+    return _modules.take(3).toList();
+  }
 
   String get _firstName {
     final local = widget.email.split('@').first.split('.').first;
@@ -47,13 +137,18 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() {
           _isLoggingOut = false;
-          _errorMessage = 'No se pudo cerrar sesión. Inténtalo de nuevo.';
+          _errorMessage = 'No se pudo cerrar la sesión en el servicio o en el dispositivo. Inténtalo de nuevo.';
         });
       }
     }
   }
 
   void _open(String title) {
+    if (title == 'Asistencia' && _roleSet.contains('DOCENTE')) {
+      Navigator.of(context)
+          .push(MaterialPageRoute<void>(builder: (_) => _moduleScreen(title)));
+      return;
+    }
     if (title == 'Calificaciones') {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -67,6 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'Materias',
       'Horarios',
       'Tareas',
+      'Asistencia',
       'Notificaciones',
       'Perfil',
     }.contains(title)) {
@@ -96,6 +192,15 @@ class _HomeScreenState extends State<HomeScreen> {
     'Horarios' => Icons.calendar_month,
     'Tareas' => Icons.assignment,
     'Asistencia' => Icons.check_circle_outline,
+    'Grupos' => Icons.groups_outlined,
+    'Cafetería' => Icons.restaurant,
+    'Pedidos' => Icons.receipt_long,
+    'Votaciones' => Icons.how_to_vote,
+    'Pagos' => Icons.payments_outlined,
+    'Constancias' => Icons.description_outlined,
+    'Usuarios' => Icons.people_outline,
+    'Roles' => Icons.admin_panel_settings_outlined,
+    'Incidencias' => Icons.support_agent,
     'Notificaciones' => Icons.notifications_none,
     _ => Icons.person_outline,
   };
@@ -109,24 +214,14 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
         onDestinationSelected: (i) => setState(() => _tab = i),
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),
             label: 'Inicio',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.menu_book_outlined),
-            label: 'Materias',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.notifications_none),
-            label: 'Notificaciones',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            label: 'Perfil',
-          ),
+          for (final module in _navigationModules)
+            NavigationDestination(icon: Icon(_iconFor(module)), label: module),
         ],
       ),
     );
@@ -163,18 +258,29 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.white,
                     icon: const Icon(Icons.notifications_none),
                   ),
-                  PopupMenuButton<String>(
-                    iconColor: Colors.white,
-                    onSelected: (_) => _logout(),
-                    itemBuilder: (_) => const [
-                      PopupMenuItem(
-                        value: 'logout',
-                        child: Text('Cerrar sesión'),
-                      ),
-                    ],
+                  TextButton.icon(
+                    onPressed: _isLoggingOut ? null : _logout,
+                    style: TextButton.styleFrom(foregroundColor: Colors.white),
+                    icon: _isLoggingOut
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.logout, size: 18),
+                    label: Text(
+                      _isLoggingOut ? 'Cerrando...' : 'Cerrar sesión',
+                    ),
                   ),
                 ],
               ),
+              if (_errorMessage != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
               Text(
                 '¡Hola, $_firstName!',
                 style: const TextStyle(
@@ -196,12 +302,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     backgroundColor: Color(0xffe3edff),
                     child: Icon(Icons.person, color: Color(0xff2949b4)),
                   ),
-                  title: const Text(
-                    'Estudiante',
+                  title: Text(
+                    _roleTitle,
                     style: TextStyle(fontSize: 12, color: Color(0xff2949b4)),
                   ),
-                  subtitle: const Text(
-                    'Ingeniería en Sistemas\nCuarto semestre',
+                  subtitle: Text(
+                    widget.email,
                     style: TextStyle(fontWeight: FontWeight.w600, height: 1.5),
                   ),
                   trailing: const Icon(Icons.chevron_right),
@@ -221,28 +327,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         sliver: SliverList.list(
           children: [
-            Row(
-              children: const [
-                Expanded(
-                  child: _MetricCard(
-                    title: 'Promedio general',
-                    value: '9.2',
-                    icon: Icons.bar_chart,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: _MetricCard(
-                    title: 'Asistencia',
-                    value: '95 %',
-                    icon: Icons.check_circle_outline,
-                  ),
-                ),
-              ],
+            _MetricCard(
+              title: 'Sesión activa',
+              value: _roleTitle,
+              icon: Icons.dashboard_outlined,
             ),
             const SizedBox(height: 22),
-            const Text(
-              'Tu universidad, a un toque',
+            Text(
+              _isStudent ? 'Tu universidad, a un toque' : 'Accesos de tu área',
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
@@ -252,69 +344,24 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 12),
             Row(
               children: [
-                for (final item in [
-                  ('Materias', Icons.menu_book),
-                  ('Calificaciones', Icons.bar_chart),
-                  ('Horarios', Icons.calendar_month),
-                  ('Tareas', Icons.assignment),
-                  ('Asistencia', Icons.check_circle_outline),
-                ])
+                for (final module in _modules.take(5))
                   Expanded(
                     child: _Shortcut(
-                      label: item.$1,
-                      icon: item.$2,
-                      onTap: () => _open(item.$1),
+                      label: module,
+                      icon: _iconFor(module),
+                      onTap: () => _open(module),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 25),
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Próximas clases',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xff24334f),
-                    ),
-                  ),
+            if (_isStudent)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.calendar_month),
+                  title: const Text('Consulta tus próximas clases'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _open('Horarios'),
                 ),
-                TextButton(
-                  onPressed: () => _open('Horarios'),
-                  child: const Text('Ver horario'),
-                ),
-              ],
-            ),
-            Text(
-              'HOY · MIÉRCOLES, 18 NOV',
-              style: TextStyle(
-                color: Colors.blueGrey.shade500,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const _ClassCard(
-              time: '09:00',
-              end: '10:30',
-              name: 'Programación orientada a objetos',
-              place: 'Aula B-204',
-              badge: 'En 30 min',
-            ),
-            const SizedBox(height: 10),
-            const _ClassCard(
-              time: '11:00',
-              end: '12:30',
-              name: 'Base de datos II',
-              place: 'Laboratorio 3',
-            ),
-            const SizedBox(height: 20),
-            if (_errorMessage != null)
-              Text(
-                _errorMessage!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
           ],
         ),
@@ -323,12 +370,9 @@ class _HomeScreenState extends State<HomeScreen> {
   );
 
   Widget _otherTab(bool compact) {
-    final title = ['Inicio', 'Materias', 'Notificaciones', 'Perfil'][_tab];
+    final title = _navigationModules[_tab - 1];
     if (title != 'Inicio') {
-      return AcademicModuleScreen(
-        title: title,
-        loadRows: () => widget.loadAcademicModule(title),
-      );
+      return _moduleScreen(title);
     }
     return _ModulePage(
       title: title,
@@ -336,6 +380,20 @@ class _HomeScreenState extends State<HomeScreen> {
       message: title == 'Perfil'
           ? widget.email
           : 'Aquí encontrarás tus $title.',
+    );
+  }
+
+  Widget _moduleScreen(String title) {
+    if (title == 'Asistencia' && _roleSet.contains('DOCENTE')) {
+      return TeacherAttendanceScreen(
+        loadSessions: () => widget.loadAcademicModule(title),
+        loadRoster: widget.loadAttendanceRoster,
+        saveAttendance: widget.saveAttendance,
+      );
+    }
+    return AcademicModuleScreen(
+      title: title,
+      loadRows: () => widget.loadAcademicModule(title),
     );
   }
 }
@@ -404,70 +462,6 @@ class _Shortcut extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 9),
           ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _ClassCard extends StatelessWidget {
-  const _ClassCard({
-    required this.time,
-    required this.end,
-    required this.name,
-    required this.place,
-    this.badge,
-  });
-  final String time, end, name, place;
-  final String? badge;
-  @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          Column(
-            children: [
-              Text(
-                time,
-                style: const TextStyle(
-                  color: Color(0xff3159c8),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                end,
-                style: const TextStyle(fontSize: 11, color: Colors.blueGrey),
-              ),
-            ],
-          ),
-          const SizedBox(width: 14),
-          const SizedBox(
-            height: 38,
-            child: VerticalDivider(
-              width: 1,
-              thickness: 2,
-              color: Color(0xff5b82e8),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on_outlined, size: 14),
-                    Text(place, style: const TextStyle(fontSize: 11)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          if (badge != null)
-            Chip(label: Text(badge!, style: const TextStyle(fontSize: 10))),
         ],
       ),
     ),

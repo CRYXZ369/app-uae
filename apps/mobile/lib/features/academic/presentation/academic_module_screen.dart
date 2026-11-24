@@ -66,6 +66,7 @@ class _AcademicModuleScreenState extends State<AcademicModuleScreen> {
     final titleKeys = switch (widget.title) {
       'Materias' => ['materia'],
       'Horarios' => ['actividad'],
+      'Asistencia' => ['actividad'],
       'Tareas' => ['titulo'],
       'Notificaciones' => ['titulo'],
       _ => ['nombre', 'apellidos'],
