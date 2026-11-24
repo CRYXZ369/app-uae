@@ -4,6 +4,7 @@ import '../../../core/session/session_store.dart';
 import '../../grades/domain/course_grade_summary.dart';
 import '../../grades/presentation/course_grades_screen.dart';
 import '../../academic/presentation/academic_module_screen.dart';
+import '../../academic/presentation/tasks_screen.dart';
 import '../../academic/presentation/teacher_attendance_screen.dart';
 import '../../transport/presentation/transport_screen.dart';
 
@@ -168,6 +169,27 @@ class _HomeScreenState extends State<HomeScreen> {
         MaterialPageRoute<void>(
           builder: (_) =>
               CourseGradesScreen(loadCourses: widget.loadCourseGrades),
+        ),
+      );
+      return;
+    }
+    if (title == 'Tareas' && _isStudent) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) =>
+              TasksScreen(loadTasks: () => widget.loadAcademicModule('Tareas')),
+        ),
+      );
+      return;
+    }
+    if (title == 'Tareas' && _roleSet.contains('DOCENTE')) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => _ModulePage(
+            title: title,
+            icon: _iconFor(title),
+            message: 'La consulta y publicación de tareas para docentes todavía no está disponible.',
+          ),
         ),
       );
       return;

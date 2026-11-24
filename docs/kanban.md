@@ -29,9 +29,9 @@ Estados: `Backlog` -> `Por hacer` -> `En progreso` -> `En revisión` -> `Hecho`.
 | ID | Actividad | Responsable | Estado |
 |---|---|---|---|
 | F2-01 | Login, sesión expirada y perfil | CRYXZ + Donovan | En progreso ([detalle](modules/f2-01-sesion.md)) |
-| F2-02 | Inicio con tarjetas y accesos rápidos | Donovan | Por hacer |
-| F2-03 | Modelo y horarios de demostración; filtro API por usuario pendiente | Donovan + CRYXZ | En progreso |
-| F2-04 | Tareas y calificaciones: modelo SQL y consulta móvil demo; API e integración docente pendientes | Donovan | En progreso |
+| F2-02 | Inicio por rol y accesos rápidos integrado; faltan tarjetas académicas con datos reales | Donovan | En progreso |
+| F2-03 | Modelo y horarios de demostración; consulta API filtrada por sesión conectada | Donovan + CRYXZ | En progreso |
+| F2-04 | Tareas y calificaciones: modelos, consultas API autenticadas y pantallas de alumno; faltan entregas/cambios de estado y captura docente | Donovan | En progreso |
 | F2-05 | Avisos segmentados | Camila + CRYXZ | Por hacer |
 | F2-06 | Votaciones y resultados | Camila + CRYXZ | Por hacer |
 | F2-07 | Pruebas de flujos académicos | Carlos | Por hacer |
@@ -44,7 +44,7 @@ Estados: `Backlog` -> `Por hacer` -> `En progreso` -> `En revisión` -> `Hecho`.
 | F3-02 | Horarios estimados por parada | Kike | Por hacer |
 | F3-03 | Confirmación de salida de las 12:00 p. m. (mediodía) | Kike + Camila | Por hacer |
 | F3-04 | Modelo de ubicación y última actualización | Kike + CRYXZ | Por hacer |
-| F3-05 | Mapa/estado de unidad en Flutter | Donovan | Por hacer |
+| F3-05 | Seguimiento esquemático simulado en Flutter; mapa y ubicación GPS real pendientes | Donovan | En progreso |
 | F3-06 | Pruebas con ruta faltante POR_CONFIRMAR | Carlos | Por hacer |
 
 ## Fase 4 - Compras, pagos y documentos
