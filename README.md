@@ -19,7 +19,15 @@ La información de rutas, montos, horarios y políticas debe validarse con la un
 
 ## Inicio rápido (presentación en navegador local)
 
-Requiere `services/api-java/.env` configurado con la base de datos. Abre **dos terminales** y ejecuta cada comando en una sola línea:
+Requiere `services/api-java/.env` configurado con la base de datos.
+
+**Opción recomendada (1 sola terminal):**
+
+```sh
+cd /home/CRYXZ/app-uae && ./iniciar-presentacion.sh
+```
+
+**Opción manual (2 terminales en una sola línea cada una):**
 
 **Terminal 1 — API Java (puerto 8080):**
 
