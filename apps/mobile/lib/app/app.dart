@@ -298,27 +298,38 @@ class _AppUaeState extends State<AppUae> {
               onLogout: _logout,
               email: _session!.email,
               roles: _session!.roles,
-              loadCourseGrades: () =>
-                  _api!.getCourseGrades(_session!.accessToken),
-              loadAcademicModule: (module) =>
-                  _api!.getAcademicModule(_session!.accessToken, module),
-              loadAttendanceRoster: (scheduleId, date) => _api!
-                  .getAttendanceRoster(_session!.accessToken, scheduleId, date),
+              hasApi: _api != null,
+              loadCourseGrades: () => _api == null
+                  ? Future.error(const IdentityApiException())
+                  : _api.getCourseGrades(_session!.accessToken),
+              loadAcademicModule: (module) => _api == null
+                  ? Future.error(const IdentityApiException())
+                  : _api.getAcademicModule(_session!.accessToken, module),
+              loadAttendanceRoster: (scheduleId, date) => _api == null
+                  ? Future.error(const IdentityApiException())
+                  : _api.getAttendanceRoster(
+                      _session!.accessToken,
+                      scheduleId,
+                      date,
+                    ),
               saveAttendance: (scheduleId, studentId, date, status) =>
-                  _api!.recordAttendance(
-                    _session!.accessToken,
-                    scheduleId: scheduleId,
-                    studentId: studentId,
-                    date: date,
-                    status: status,
-                  ),
-              saveTaskProgress: (taskId, status, {content}) =>
-                  _api!.saveTaskProgress(
-                    _session!.accessToken,
-                    taskId: taskId,
-                    status: status,
-                    content: content,
-                  ),
+                  _api == null
+                  ? Future.error(const IdentityApiException())
+                  : _api.recordAttendance(
+                      _session!.accessToken,
+                      scheduleId: scheduleId,
+                      studentId: studentId,
+                      date: date,
+                      status: status,
+                    ),
+              saveTaskProgress: (taskId, status, {content}) => _api == null
+                  ? Future.error(const IdentityApiException())
+                  : _api.saveTaskProgress(
+                      _session!.accessToken,
+                      taskId: taskId,
+                      status: status,
+                      content: content,
+                    ),
             ),
       onUnknownRoute: (_) => MaterialPageRoute<void>(
         builder: (_) => AppErrorScreen(

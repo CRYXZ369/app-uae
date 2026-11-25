@@ -36,6 +36,9 @@ class _TransportScreenState extends State<TransportScreen> {
   int _selectedRoute = 1;
   double _progress = .38;
   bool _running = true;
+  bool _noonConfirmed = false;
+  int _noonConfirmations = 12;
+  static const _noonMinimum = 15;
   Timer? _timer;
 
   _TransportRoute get _route => _routes[_selectedRoute];
@@ -257,20 +260,87 @@ class _TransportScreenState extends State<TransportScreen> {
             ),
           ),
           Card(
-            child: ListTile(
-              leading: const Icon(Icons.how_to_vote_outlined),
-              title: const Text('Salida UAE → El Charco · 12:00 p. m.'),
-              subtitle: const Text(
-                'La confirmación de esta salida forma parte del MVP. La votación y el mínimo de pasajeros aún requieren integración.',
-              ),
-              isThreeLine: true,
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'La confirmación de salida estará disponible en una siguiente iteración.',
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.how_to_vote_outlined,
+                        color: Color(0xff214b78),
+                      ),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Salida UAE → El Charco · 12:00 p. m.',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _noonConfirmations >= _noonMinimum
+                              ? const Color(0xffe8f5ed)
+                              : const Color(0xffeaf1ff),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '$_noonConfirmations / $_noonMinimum',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: _noonConfirmations >= _noonMinimum
+                                ? const Color(0xff27845a)
+                                : const Color(0xff214b78),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Confirmación tentativa de lunes a viernes (simulación local; mínimo 15 pasajeros para salida).',
+                    style: TextStyle(color: Color(0xff5b6b80), fontSize: 13),
+                  ),
+                  const SizedBox(height: 10),
+                  LinearProgressIndicator(
+                    value: (_noonConfirmations / _noonMinimum).clamp(0.0, 1.0),
+                    minHeight: 7,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: _noonConfirmed
+                        ? OutlinedButton.icon(
+                            onPressed: () => setState(() {
+                              _noonConfirmed = false;
+                              _noonConfirmations--;
+                            }),
+                            icon: const Icon(Icons.close, size: 18),
+                            label: const Text('Cancelar lugar'),
+                          )
+                        : FilledButton.icon(
+                            onPressed: () => setState(() {
+                              _noonConfirmed = true;
+                              _noonConfirmations++;
+                            }),
+                            icon: const Icon(
+                              Icons.check_circle_outline,
+                              size: 18,
+                            ),
+                            label: const Text('Confirmar salida 12:00 p. m.'),
+                          ),
+                  ),
+                ],
               ),
             ),
           ),

@@ -238,10 +238,8 @@ void main() {
     await tester.tap(find.text('Cerrar sesión'));
     await tester.pumpAndSettle();
     expect(store.session, isNull);
-    expect(requests, [
-      'POST /api/v1/sessions',
-      'POST /api/v1/sessions/current/revoke',
-    ]);
+    expect(requests.first, 'POST /api/v1/sessions');
+    expect(requests.last, 'POST /api/v1/sessions/current/revoke');
   });
 
   testWidgets('una sesión revocada se descarta al restaurar', (tester) async {

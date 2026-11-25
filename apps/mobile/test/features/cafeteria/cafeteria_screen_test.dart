@@ -13,6 +13,11 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(find.text('Cafetería Arriba'), findsOneWidget);
+    expect(find.text('Cafetería Abajo'), findsOneWidget);
+    await tester.tap(find.text('Cafetería Abajo'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Chilaquiles verdes con pollo'), findsOneWidget);
     expect(find.text('\$0.00 MXN'), findsOneWidget);
 

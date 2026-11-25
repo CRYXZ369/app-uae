@@ -48,8 +48,10 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
     ),
   ];
 
+  static const _locations = ['Cafetería Arriba', 'Cafetería Abajo'];
   static const _categories = ['Todas', 'Desayuno', 'Comida', 'Bebidas'];
   final Map<int, int> _cart = {};
+  String _location = 'Cafetería Arriba';
   String _category = 'Todas';
   bool _demoOrderSent = false;
 
@@ -168,6 +170,18 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
               ],
             ),
           ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+          child: SegmentedButton<String>(
+            segments: [
+              for (final location in _locations)
+                ButtonSegment<String>(value: location, label: Text(location)),
+            ],
+            selected: {_location},
+            onSelectionChanged: (value) =>
+                setState(() => _location = value.first),
+          ),
+        ),
         SizedBox(
           height: 42,
           child: ListView(

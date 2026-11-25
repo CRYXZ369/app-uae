@@ -14,6 +14,15 @@ void main() {
       expect(find.text('GPS SIMULADO'), findsOneWidget);
       expect(find.textContaining('Ubicación simulada:'), findsOneWidget);
       expect(find.text('El Charco'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('Confirmar salida 12:00 p. m.'),
+        200,
+      );
+      expect(find.text('12 / 15'), findsOneWidget);
+      await tester.tap(find.text('Confirmar salida 12:00 p. m.'));
+      await tester.pumpAndSettle();
+      expect(find.text('13 / 15'), findsOneWidget);
     },
   );
 }
