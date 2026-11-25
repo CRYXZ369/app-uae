@@ -43,6 +43,8 @@ class SecureSessionStore implements SessionStore {
       throw const SessionStorageException();
     } on MissingPluginException {
       throw const SessionStorageException();
+    } on UnsupportedError {
+      throw const SessionStorageException();
     }
   }
 
@@ -57,6 +59,8 @@ class SecureSessionStore implements SessionStore {
       throw const SessionStorageException();
     } on MissingPluginException {
       throw const SessionStorageException();
+    } on UnsupportedError {
+      throw const SessionStorageException();
     }
   }
 
@@ -67,6 +71,8 @@ class SecureSessionStore implements SessionStore {
     } on PlatformException {
       throw const SessionStorageException();
     } on MissingPluginException {
+      throw const SessionStorageException();
+    } on UnsupportedError {
       throw const SessionStorageException();
     }
   }

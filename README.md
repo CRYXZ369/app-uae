@@ -17,6 +17,24 @@ La aplicación móvil tiene una base inicial en **Flutter** y una **API REST Jav
 
 La información de rutas, montos, horarios y políticas debe validarse con la universidad antes de considerarse oficial.
 
+## Inicio rápido (presentación en navegador local)
+
+Requiere `services/api-java/.env` configurado con la base de datos. Abre **dos terminales** y ejecuta cada comando en una sola línea:
+
+**Terminal 1 — API Java (puerto 8080):**
+
+```sh
+cd /home/CRYXZ/app-uae && set -a && source services/api-java/.env && set +a && export DEV_WEB_ORIGINS=http://127.0.0.1:8081,http://localhost:8081 && cd services/api-java && mvn spring-boot:run
+```
+
+**Terminal 2 — Flutter Web (puerto 8081):**
+
+```sh
+cd /home/CRYXZ/app-uae/apps/mobile && flutter run -d web-server --web-hostname=127.0.0.1 --web-port=8081 --dart-define=API_BASE_URL=http://127.0.0.1:8080
+```
+
+Una vez que ambos servicios estén corriendo, abre `http://127.0.0.1:8081` en tu navegador (usa `F12` + `Ctrl + Shift + M` para activar el modo de vista móvil). Consulta [apps/mobile/README.md](apps/mobile/README.md) para pruebas en teléfonos por red Wi-Fi.
+
 ## Estructura del monorepo
 
 ```text

@@ -22,13 +22,23 @@ El proyecto se creó con Flutter stable 3.50.0. Cada integrante necesita su
 propio SDK; este no se comparte en Git. La primera descarga de dependencias
 requiere conexión a internet.
 
-Para probar el login en navegador con la API local configurada y en ejecución,
-inicia la API con `DEV_WEB_ORIGIN=http://127.0.0.1:8081` y después ejecuta:
+Para probar el login en navegador con la API local configurada y en ejecución, abre **dos terminales** y ejecuta cada comando completo en una sola línea:
+
+1. **Terminal 1 (API Java):**
 
 ```sh
-flutter run -d web-server --web-hostname=127.0.0.1 --web-port=8081 \
-  --dart-define=API_BASE_URL=http://127.0.0.1:8080
+cd /home/CRYXZ/app-uae && set -a && source services/api-java/.env && set +a && export DEV_WEB_ORIGINS=http://127.0.0.1:8081,http://localhost:8081 && cd services/api-java && mvn spring-boot:run
 ```
+
+Espera a ver `Started ApiApplication` (puerto `8080`). No cierres esta terminal.
+
+2. **Terminal 2 (Flutter Web):**
+
+```sh
+cd /home/CRYXZ/app-uae/apps/mobile && flutter run -d web-server --web-hostname=127.0.0.1 --web-port=8081 --dart-define=API_BASE_URL=http://127.0.0.1:8080
+```
+
+3. **Abrir en el navegador:** entra a `http://127.0.0.1:8081` (para vista de teléfono en Chrome/Opera/Firefox, presiona `F12` y luego `Ctrl + Shift + M`).
 
 La API debe estar preparada con una base y cuentas ficticias de desarrollo.
 La vista web no sustituye las pruebas de almacenamiento seguro en dispositivos.

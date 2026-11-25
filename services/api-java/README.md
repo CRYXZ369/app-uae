@@ -33,7 +33,7 @@ de sesiones vencidas, observabilidad y política institucional de usuarios.
    set -a
    source services/api-java/.env
    set +a
-   export DEV_WEB_ORIGIN=http://127.0.0.1:8081
+   export DEV_WEB_ORIGINS=http://127.0.0.1:8081,http://localhost:8081
    cd services/api-java
    mvn spring-boot:run
    ```
