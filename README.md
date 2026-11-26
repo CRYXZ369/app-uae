@@ -21,11 +21,19 @@ La información de rutas, montos, horarios y políticas debe validarse con la un
 
 Requiere `services/api-java/.env` configurado con la base de datos.
 
-**Opción recomendada (1 sola terminal):**
+**Opción recomendada — solo tu laptop (1 sola terminal):**
 
 ```sh
 cd /home/CRYXZ/app-uae && ./iniciar-presentacion.sh
 ```
+
+**Opción para Stand — tu laptop + otra computadora + teléfono por Wi-Fi/Hotspot (carga rápida en modo release):**
+
+```sh
+cd /home/CRYXZ/app-uae && ./iniciar-stand.sh
+```
+
+Este comando detecta automáticamente la IP de tu laptop, levanta la API en red local (`8080`), compila Flutter optimizado para celulares y muestra la URL exacta (`http://<TU_IP>:8081`) que debes abrir en la computadora y el teléfono del stand.
 
 **Opción manual (2 terminales en una sola línea cada una):**
 
