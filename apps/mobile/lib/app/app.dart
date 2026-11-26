@@ -230,6 +230,24 @@ class _AppUaeState extends State<AppUae> {
         ),
         scaffoldBackgroundColor: const Color(0xfff4f7fb),
         useMaterial3: true,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xfff4f7fb),
+          surfaceTintColor: Colors.transparent,
+          foregroundColor: Color(0xff1e3553),
+          elevation: 0,
+          centerTitle: false,
+          titleTextStyle: TextStyle(
+            color: Color(0xff1e3553),
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        snackBarTheme: SnackBarThemeData(
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
         cardTheme: CardThemeData(
           color: Colors.white,
           elevation: 1,

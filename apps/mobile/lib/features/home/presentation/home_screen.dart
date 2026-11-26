@@ -330,23 +330,31 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
     if (title == 'Calificaciones') {
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) =>
-              CourseGradesScreen(loadCourses: widget.loadCourseGrades),
-        ),
-      );
+      Navigator.of(context)
+          .push(
+            MaterialPageRoute<void>(
+              builder: (_) =>
+                  CourseGradesScreen(loadCourses: widget.loadCourseGrades),
+            ),
+          )
+          .then((_) {
+            if (widget.hasApi && mounted) _loadDashboardSummary();
+          });
       return;
     }
     if (title == 'Tareas' && _isStudent) {
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => TasksScreen(
-            loadTasks: () => widget.loadAcademicModule('Tareas'),
-            saveProgress: widget.saveTaskProgress,
-          ),
-        ),
-      );
+      Navigator.of(context)
+          .push(
+            MaterialPageRoute<void>(
+              builder: (_) => TasksScreen(
+                loadTasks: () => widget.loadAcademicModule('Tareas'),
+                saveProgress: widget.saveTaskProgress,
+              ),
+            ),
+          )
+          .then((_) {
+            if (widget.hasApi && mounted) _loadDashboardSummary();
+          });
       return;
     }
     if (title == 'Tareas' && _roleSet.contains('DOCENTE')) {

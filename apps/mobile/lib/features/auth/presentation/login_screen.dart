@@ -359,6 +359,25 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             ),
                           ],
+                          const SizedBox(height: 14),
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.lock_outline,
+                                size: 14,
+                                color: Color(0xff8c99ad),
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                'Acceso seguro y protegido',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xff8c99ad),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),

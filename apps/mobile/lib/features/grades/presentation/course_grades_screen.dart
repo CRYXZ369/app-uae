@@ -56,16 +56,34 @@ class _CourseGradesScreenState extends State<CourseGradesScreen> {
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                const Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      'Escala de 0 a 100. El promedio y el progreso son '
-                      'estimaciones, no calificaciones oficiales.',
-                    ),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffedf3fc),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: Color(0xff315d96),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Escala de 0 a 100. El promedio y el progreso son '
+                          'estimaciones, no calificaciones oficiales.',
+                          style: TextStyle(
+                            color: Color(0xff344e6f),
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 for (final course in courses) ...[
                   _CourseGradeCard(course: course),
                   const SizedBox(height: 12),
@@ -157,6 +175,8 @@ class _CourseGradeCard extends StatelessWidget {
             const SizedBox(height: 12),
             LinearProgressIndicator(
               value: course.courseProgress / CourseGradeSummary.scaleMaximum,
+              minHeight: 7,
+              borderRadius: BorderRadius.circular(8),
             ),
             const SizedBox(height: 4),
             Text(
