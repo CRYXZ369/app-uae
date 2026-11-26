@@ -9,6 +9,12 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 1
 fi
 
+if ss -ltn 2>/dev/null | grep -qE ':(8080|8081)\b'; then
+  echo "Los puertos 8080 u 8081 ya están en uso por otra sesión."
+  echo "Detén primero la sesión anterior con Ctrl + C y vuelve a intentar."
+  exit 1
+fi
+
 set -a
 # shellcheck source=/dev/null
 source "$ENV_FILE"

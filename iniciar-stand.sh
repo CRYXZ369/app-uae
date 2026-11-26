@@ -9,6 +9,12 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 1
 fi
 
+if ss -ltn 2>/dev/null | grep -qE ':(8080|8081)\b'; then
+  echo "Los puertos 8080 u 8081 ya están en uso por otra sesión."
+  echo "Detén primero la terminal donde ejecutaste ./iniciar-presentacion.sh (con Ctrl + C) y vuelve a intentar."
+  exit 1
+fi
+
 LAN_IP="${1:-}"
 if [[ -z "$LAN_IP" ]]; then
   LAN_IP="$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}' | head -n1 || true)"
